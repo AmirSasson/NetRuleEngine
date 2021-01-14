@@ -1,0 +1,8 @@
+D:\Repos\NetRuleEngine\src\NetRuleEngine\bin\Debug\netstandard2.0\NetRuleEngine.deps.json
+D:\Repos\NetRuleEngine\src\NetRuleEngine\bin\Debug\netstandard2.0\NetRuleEngine.dll
+D:\Repos\NetRuleEngine\src\NetRuleEngine\obj\Debug\netstandard2.0\NetRuleEngine.AssemblyInfoInputs.cache
+D:\Repos\NetRuleEngine\src\NetRuleEngine\obj\Debug\netstandard2.0\NetRuleEngine.AssemblyInfo.cs
+D:\Repos\NetRuleEngine\src\NetRuleEngine\obj\Debug\netstandard2.0\NetRuleEngine.csproj.CoreCompileInputs.cache
+D:\Repos\NetRuleEngine\src\NetRuleEngine\bin\Debug\netstandard2.0\NetRuleEngine.pdb
+D:\Repos\NetRuleEngine\src\NetRuleEngine\obj\Debug\netstandard2.0\NetRuleEngine.dll
+D:\Repos\NetRuleEngine\src\NetRuleEngine\obj\Debug\netstandard2.0\NetRuleEngine.pdb
