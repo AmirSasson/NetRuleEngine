@@ -3,8 +3,7 @@
 C# simple Rule Engine. High performance object rule matching. Support various complex grouped predeicates.
 available on [nuget](https://www.nuget.org/packages/NetRuleEngine/)
 
- - depenent on LazyCache to store compiles rules.
-Simple usage:
+#### Simple usage:
 
 ```
     var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService());
@@ -26,7 +25,11 @@ Simple usage:
             }
         });
 ```
-Supports:
+
+- depenent on LazyCache to store compiles rules.
+- compiles Expression Trees into dynamic cached code to support high performance usage.
+
+Features:
 - composite objects
 - enums
 - string
@@ -34,5 +37,7 @@ Supports:
 - datetime
 - Dictionaries
 - collections
-and may more.
-see units test for deeper usage scenarios
+
+and many more.
+S
+ee units test for full usage scenarios.
