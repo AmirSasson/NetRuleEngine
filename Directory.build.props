@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>    
+    <LangVersion>8</LangVersion>    
+    <Version>1.0.2</Version>
+    <Authors>Amir Sasson</Authors>
+    <Company>Amir Sasson</Company>
+    <RepositoryUrl>https://github.com/AmirSasson/NetRuleEngine</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>   
+  </PropertyGroup>
+</Project>

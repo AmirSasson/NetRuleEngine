@@ -301,3 +301,4 @@ coverage/*
 
 src/NetRuleEngine/NetRuleEngine.csproj.user
 /publish.script
+/api.key
