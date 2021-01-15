@@ -16,9 +16,9 @@ namespace NetRuleEngine.Domains
             this._compiler = compiler ?? throw new ArgumentNullException(nameof(compiler));
             this._cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
-        public BaseDataResponse<IEnumerable<int>> GetMatchingRules(TObjectToMatch objectToMatch, IEnumerable<RulesConfig> rulesConfig)
+        public BaseDataResponse<IEnumerable<Guid>> GetMatchingRules(TObjectToMatch objectToMatch, IEnumerable<RulesConfig> rulesConfig)
         {
-            var matching = new HashSet<int>();
+            var matching = new HashSet<Guid>();
             foreach (var ruleConfig in rulesConfig)
             {
                 try
@@ -35,11 +35,11 @@ namespace NetRuleEngine.Domains
                 }
                 catch (Exception exc)
                 {
-                    return new BaseDataResponse<IEnumerable<int>> { Code = ErrorCode.TechnicalProblem, ErrorDescription = exc.Message, Data = matching };
+                    return new BaseDataResponse<IEnumerable<Guid>> { Code = ErrorCode.TechnicalProblem, ErrorDescription = exc.Message, Data = matching };
                 }
             }
 
-            return new BaseDataResponse<IEnumerable<int>> { Data = matching };
+            return new BaseDataResponse<IEnumerable<Guid>> { Data = matching };
         }      
     }
 }

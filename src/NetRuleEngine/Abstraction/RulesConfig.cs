@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -11,7 +12,7 @@ namespace NetRuleEngine.Abstraction
             public Rule.InterRuleOperatorType RulesOperator { get; set; }
             public IEnumerable<Rule> Rules { get; set; }
         }
-        public int Id { get; set; }
+        public Guid Id { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public Rule.InterRuleOperatorType RulesOperator { get; set; }

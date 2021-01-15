@@ -23,7 +23,7 @@ namespace NetRuleEngineTests
                 new TestModel { NumericField = numericValueTest },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                         Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -53,7 +53,7 @@ namespace NetRuleEngineTests
                 new TestModel { NumericField = numericValueTest },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -81,7 +81,7 @@ namespace NetRuleEngineTests
                 new TestModel { TextField = "SomePrefixBlahBlah" },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                         Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -109,7 +109,7 @@ namespace NetRuleEngineTests
                 new TestModel { TextField = "SomePrefixBlahBlah", NumericField = 10 },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -138,7 +138,7 @@ namespace NetRuleEngineTests
                 new TestModel { TextField = "SomePrefixBlahBlah", NumericField = 10 },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                         Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -167,7 +167,7 @@ namespace NetRuleEngineTests
                 new TestModel { TextField = "SomePrefixBlahBlah", NumericField = 10 },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -203,7 +203,7 @@ namespace NetRuleEngineTests
                 new TestModel { TextField = "SomePrefixBlahBlah", NumericField = 10 },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                         Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {                // this group does not match!
@@ -239,7 +239,7 @@ namespace NetRuleEngineTests
                 new TestModel { Composit = new TestModel.CompositeInnerClass { NumericField = 10 } },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -267,7 +267,7 @@ namespace NetRuleEngineTests
                 new TestModel { CompositeCollection = new List<TestModel.CompositeInnerClass> { new TestModel.CompositeInnerClass { NumericField = 10 } } },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                         Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -295,7 +295,7 @@ namespace NetRuleEngineTests
                 new TestModel { CompositeCollection = new List<TestModel.CompositeInnerClass> { new TestModel.CompositeInnerClass { NumericField = 10 } } },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -324,7 +324,7 @@ namespace NetRuleEngineTests
                 new TestModel { KeyValueCollection = new Dictionary<string, object> { { "DateOfBirth", DateTime.Now } } },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                         Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -352,7 +352,7 @@ namespace NetRuleEngineTests
                 new TestModel { KeyValueCollection = new Dictionary<string, object> { { "DateOfBirth", DateTime.Now } } },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -381,7 +381,7 @@ namespace NetRuleEngineTests
                 new TestModel { SomeEnumValue = TestModel.SomeEnum.Yes },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -409,7 +409,7 @@ namespace NetRuleEngineTests
                 new TestModel { NumericField = 3 },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -437,7 +437,7 @@ namespace NetRuleEngineTests
                 new TestModel { NumericField = 10 },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                         Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -466,7 +466,7 @@ namespace NetRuleEngineTests
                 new TestModel { NumericField = 10, TextField = "test1" },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -478,7 +478,7 @@ namespace NetRuleEngineTests
                         }
                     },
                      new RulesConfig {
-                        Id = 2,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -506,7 +506,7 @@ namespace NetRuleEngineTests
                 new TestModel { PrimitivesCollection = new List<int> { 1, 2, 4, 5 } },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {
@@ -535,7 +535,7 @@ namespace NetRuleEngineTests
                 new TestModel { PrimitivesCollection = new List<int> { 1, 2, 4, 5 } },
                 new[] {
                     new RulesConfig {
-                        Id = 1,
+                        Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
                             new RulesGroup {

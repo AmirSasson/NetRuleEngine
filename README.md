@@ -18,7 +18,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
         new TestModel { NumericField = 5 },
         new[] {
             new RulesConfig {
-                Id = 1,
+                Id = Guid.NewGuid(),
                 RulesOperator = Rule.InterRuleOperatorType.And,
                 RulesGroups = new RulesGroup[] {
                     new RulesGroup {
