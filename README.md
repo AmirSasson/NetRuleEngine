@@ -48,6 +48,4 @@ Features:
 - Dictionaries
 - collections
 
-and many more.
-S
-ee units test for full usage scenarios.
+and many more. See units test for full usage scenarios.
