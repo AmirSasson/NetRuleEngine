@@ -13,8 +13,8 @@ namespace NetRuleEngine.Domains
 
         public RulesService(IRulesCompiler compiler, IAppCache cache)
         {
-            this._compiler = compiler ?? throw new ArgumentNullException(nameof(compiler));
-            this._cache = cache ?? throw new ArgumentNullException(nameof(cache));
+            _compiler = compiler ?? throw new ArgumentNullException(nameof(compiler));
+            _cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
         public BaseDataResponse<IEnumerable<Guid>> GetMatchingRules(TObjectToMatch objectToMatch, IEnumerable<RulesConfig> rulesConfig)
         {
@@ -23,7 +23,7 @@ namespace NetRuleEngine.Domains
             {
                 try
                 {
-                    var compiledRule = _cache.GetOrAdd($"{this.GetType().Name}.{ruleConfig.Id}", () =>
+                    var compiledRule = _cache.GetOrAdd($"{GetType().Name}.{ruleConfig.Id}", () =>
                     {
                         return _compiler.CompileRule<TObjectToMatch>(ruleConfig);
                     });
@@ -40,6 +40,6 @@ namespace NetRuleEngine.Domains
             }
 
             return new BaseDataResponse<IEnumerable<Guid>> { Data = matching };
-        }      
+        }
     }
 }

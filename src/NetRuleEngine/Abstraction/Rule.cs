@@ -29,7 +29,7 @@ namespace NetRuleEngine.Abstraction
             //
             // Summary:
             //     A "less than or equal to" comparison, such as (a <= b).
-            LessThanOrEqual = 21,            
+            LessThanOrEqual = 21,
             //
             // Summary:
             //     An inequality comparison, such as (a != b) in C# or (a <> b) in Visual Basic.
