@@ -299,3 +299,5 @@ coverage/*
 
 /tests/tests/coverage.*
 
+src/NetRuleEngine/NetRuleEngine.csproj.user
+/publish.script
