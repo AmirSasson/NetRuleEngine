@@ -10,14 +10,18 @@ namespace NetRuleEngineTests
 {
     public class RulesTests
     {
-        [Fact]
-        public void GetMatchingRules_NumericValueMatch_RuleReturned()
+        [Theory]
+        [InlineData(5, Rule.ComparisonOperatorType.Equal, 5, true)]
+        [InlineData(5, Rule.ComparisonOperatorType.LessThan, 4, true)]
+        [InlineData(5, Rule.ComparisonOperatorType.LessThan, 6, false)]
+        [InlineData(5, Rule.ComparisonOperatorType.GreaterThan, 6, true)]
+        public void GetMatchingRules_NumericValueMatch_ShouldMatchByOperatorAndValue(int ruleVal, Rule.ComparisonOperatorType op, int objectVal, bool shouldMatch)
         {
             // Arrange
             var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService());
 
             // Act
-            var numericValueTest = 5;
+            var numericValueTest = objectVal;
             var matching = engine.GetMatchingRules(
                 new TestModel { NumericField = numericValueTest },
                 new[] {
@@ -28,15 +32,22 @@ namespace NetRuleEngineTests
                             new RulesGroup {
                                 RulesOperator = Rule.InterRuleOperatorType.And,
                                 Rules = new[] {
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.Equal, ComparisonValue = numericValueTest.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
+                                    new Rule { ComparisonOperator = op, ComparisonValue = ruleVal.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
                                 }
                             }
                         }
                     }
                 });
 
-            // Assert            
-            Assert.Single(matching.Data);
+            // Assert  
+            if (shouldMatch)
+            {
+                Assert.Single(matching.Data);
+            }
+            else
+            {
+                Assert.Empty(matching.Data);
+            }
         }
 
         [Fact]
