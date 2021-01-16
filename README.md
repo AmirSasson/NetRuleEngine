@@ -12,6 +12,26 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 - Audience Matching
 - Dynamic Alerts detection
 
+```
++---------------+   SET    +------------+                    +---------+
+|  Rules Admin  |  +-----> |    Rule    |  +---------------> |  Rules  |
++---------------+          |   Editor   |      SAVE AS JSON  |   DB    |
+                           |     UI     |                    |         |
+                           +------------+                    +--+------+
+                                                                ^
+                                                                |
+                                                                |
+                                                                |
+                           +-----------------+                  |
+                           |    BUSSINESS    |                  |
+ +---------------+         |      LOGIC      |                  |
+ |               |         |                 |                  |
+ |   Business    | +-----> |      with       +-------------------
+ |     EVENT     |         |  NetRuleEngine  |
+ +---------------+         |                 |
+                           +-----------------+
+
+```
 
 #### Simple usage:
 
