@@ -12,6 +12,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 - Audience Matching
 - Dynamic Alerts detection
 
+#### Common Usage Scenario
 ```
 +---------------+   SET    +------------+                    +---------+
 |  Rules Admin  |  +-----> |    Rule    |  +---------------> |  Rules  |
@@ -30,8 +31,13 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
  |     EVENT     |         |  NetRuleEngine  |
  +---------------+         |                 |
                            +-----------------+
-
 ```
+* Rules Admin - Actor Role - that sets the rules to identify a specify event or state.
+* Rules DB - Data base to store Rules
+* Business Event - an Event that occurs on the bussines flow, and changes a state on your backend, or a stand alone event that needs to be tested for rule matching. can be anything as a site Visit, transaction, UI event, Login, Registration or whatever.
+* BUSSINESS LOGIC - this is the backend that referene the NetRuleEngine package, consumes the Rules from DB, and for each Event, run the Rule matchin and acts according to the result
+
+###### this solution doesnt not provide any rules editor UX or DB.
 
 #### Simple usage:
 
