@@ -67,8 +67,8 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
         });
 ```
 
-- depenent on LazyCache to store compiles rules.
-- compiles Expression Trees into dynamic cached code to support high performance usage.
+- depenent on [LazyCache](https://github.com/alastairtree/LazyCache) to store compiles rules.
+- compiles [Expression Trees](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/expression-trees/) into dynamic cached code to support high performance usage.
 
 Rule Config JSON Format Example:
 ```
