@@ -173,10 +173,9 @@ namespace NetRuleEngineTests
             var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService());
 
             // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { TextField = "SomePrefixBlahBlah", NumericField = 10 },
-                new[] {
-                    new RulesConfig {
+            var rules =
+                    new RulesConfig
+                    {
                         Id = Guid.NewGuid(),
                         RulesOperator = Rule.InterRuleOperatorType.And,
                         RulesGroups = new RulesGroup[] {
@@ -195,9 +194,13 @@ namespace NetRuleEngineTests
                                 }
                             }
                         }
-                    }
-                });
+                    };
+            var text = System.Text.Json.JsonSerializer.Serialize(rules);
+            var desirialedRules = System.Text.Json.JsonSerializer.Deserialize<RulesConfig>(text);
 
+            var matching = engine.GetMatchingRules(
+                    new TestModel { TextField = "SomePrefixBlahBlah", NumericField = 10 },
+                    new[] { desirialedRules });
             // Assert            
             Assert.Single(matching.Data);
         }

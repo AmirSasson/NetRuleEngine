@@ -2,8 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <PackageId>NetRuleEngine</PackageId>
-    <LangVersion>8</LangVersion>
+    <PackageId>NetRuleEngine</PackageId>     
   </PropertyGroup>
 
   <ItemGroup>
