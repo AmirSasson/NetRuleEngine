@@ -42,7 +42,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 
 #### Simple usage:
 
-```
+```cs
     IRulesService<TestModel> engine = RulesService<TestModel>.CreateDefault();
             
     var matching = engine.GetMatchingRules(
@@ -54,6 +54,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
                 RulesGroups = new RulesGroup[] {
                     new RulesGroup {
                         RulesOperator = Rule.InterRuleOperatorType.And,
+                        // every TestModel instance with NumericField Equal to 5 will match this rule
                         Rules = new[] {
                             new Rule { 
                             ComparisonOperator = Rule.ComparisonOperatorType.Equal,
