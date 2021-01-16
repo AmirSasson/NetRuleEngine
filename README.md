@@ -75,7 +75,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 
 ------------------
 Rule Editor UI Example (not included in this project):  
-![editor](/docs/rule-ui.png "example")  
+![editor](/docs/rules-ui.png "example")  
 Rule Config JSON Format Example:  
 ```json
 {
