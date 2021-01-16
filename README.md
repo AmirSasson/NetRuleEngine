@@ -1,6 +1,6 @@
  NetRuleEngine
  ==============
-C# simple Rule Engine. High performance object rule matching. Support various complex grouped predeicates.
+C# simple Rule Engine. High performance object rule matching. Support various complex grouped predicates.
 available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 
 (Input) An Object + Rule(s) => (Output) Is Match
