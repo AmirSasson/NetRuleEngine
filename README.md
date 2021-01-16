@@ -17,7 +17,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 +---------------+   SET    +------------+                    +---------+
 |  Rules Admin  |  +-----> |    Rule    |  +---------------> |  Rules  |
 +---------------+          |   Editor   |      SAVE AS JSON  |   DB    |
-                           |     UI     |                    |         |
+  (design time)            |     UI     |                    |         |
                            +------------+                    +--+------+
                                                                 ^
                                                                 |
@@ -30,10 +30,11 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
  |   Business    | +-----> |      with       +-------------------
  |     EVENT     |         |  NetRuleEngine  |
  +---------------+         |                 |
-                           +-----------------+
+   (real time)             +-----------------+
+
 ```
-* Rules Admin - Actor Role - that sets the rules to identify a specify event or state.
-* Rules DB - Data base to store Rules
+* Rules Admin - Actor Role - that sets the rules on design time to identify an event or desired state.
+* Rules DB - Database to store the rules
 * Business Event - an Event that occurs on the bussines flow, and changes a state on your backend, or a stand alone event that needs to be tested for rule matching. can be anything as a site Visit, transaction, UI event, Login, Registration or whatever.
 * BUSSINESS LOGIC - this is the backend that referene the NetRuleEngine package, consumes the Rules from DB, and for each Event, run the Rule matchin and acts according to the result
 
