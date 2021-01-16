@@ -70,6 +70,53 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 - depenent on LazyCache to store compiles rules.
 - compiles Expression Trees into dynamic cached code to support high performance usage.
 
+Rule Config JSON Format Example:
+```
+{
+    "Id": "eff37f67-9279-4fff-b2ea-9ef6f92a5de7",
+    "RulesOperator": "And",
+    "RulesGroups": [
+        {
+            "RulesOperator": "Or",
+            "Rules": [
+                {
+                    "ComparisonPredicate": "TextField",
+                    "ComparisonOperator": "StringStartsWith",
+                    "ComparisonValue": "NOT MATCHING PREFIX",
+                    "PredicateType": null
+                },
+                {
+                    "ComparisonPredicate": "NumericField",
+                    "ComparisonOperator": "GreaterThan",
+                    "ComparisonValue": "4",
+                    "PredicateType": null
+                }
+            ]
+        },
+        {
+            "RulesOperator": "Or",
+            "Rules": [
+                {
+                    "ComparisonPredicate": "TextField",
+                    "ComparisonOperator": "StringStartsWith",
+                    "ComparisonValue": "SomePrefix",
+                    "PredicateType": null
+                },
+                {
+                    "ComparisonPredicate": "NumericField",
+                    "ComparisonOperator": "GreaterThan",
+                    "ComparisonValue": "55",
+                    "PredicateType": null
+                }
+            ]
+        }
+    ]
+}
+```
+this example represents a single rule consists on 2 groups with relation of `AND` (which means object must match both groups), on each group, at least 1 rule should match as both have `OR` operator and noth have 2 rules.
+
+-----------------
+
 Features:
 - composite objects
 - enums
