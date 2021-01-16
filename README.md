@@ -70,9 +70,9 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 - depenent on [LazyCache](https://github.com/alastairtree/LazyCache) to store compiles rules.
 - compiles [Expression Trees](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/expression-trees/) into dynamic cached code to support high performance usage.
 
-
+------------------
 Rule Editor UI Example (not included in this project): 
-![editor](/docs/rule-ui.png "example")
+![editor](/docs/rule-ui.png "example")  
 Rule Config JSON Format Example:
 ```
 {
