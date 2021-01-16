@@ -54,7 +54,7 @@ namespace NetRuleEngineTests
         public void GetMatchingRules_NumericValueNotMatch_RuleNotReturned()
         {
             // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService());
+            IRulesService<TestModel> engine = RulesService<TestModel>.CreateDefault();
 
             // Act
             var numericValueTest = 5;

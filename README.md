@@ -43,7 +43,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 #### Simple usage:
 
 ```
-    var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService());
+    IRulesService<TestModel> engine = RulesService<TestModel>.CreateDefault();
             
     var matching = engine.GetMatchingRules(
         new TestModel { NumericField = 5 },
@@ -69,6 +69,8 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 
 - depenent on [LazyCache](https://github.com/alastairtree/LazyCache) to store compiles rules.
 - compiles [Expression Trees](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/expression-trees/) into dynamic cached code to support high performance usage.
+- **dependency injection** ready, inject Either IRulesService<> or its dependencies.
+- as the RulesService is statefull and is dependent on cache, it must be configured as **singletom** on your [IOC](https://en.wikipedia.org/wiki/Inversion_of_control) (or at least, its cache dependency must be singleton)
 
 ------------------
 Rule Editor UI Example (not included in this project):  

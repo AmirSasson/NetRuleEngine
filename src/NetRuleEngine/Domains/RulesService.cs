@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace NetRuleEngine.Domains
 {
-    public class RulesService<TObjectToMatch>
+    public class RulesService<TObjectToMatch> : IRulesService<TObjectToMatch>
     {
         private readonly IRulesCompiler _compiler;
         private readonly IAppCache _cache;
@@ -15,6 +15,10 @@ namespace NetRuleEngine.Domains
         {
             _compiler = compiler ?? throw new ArgumentNullException(nameof(compiler));
             _cache = cache ?? throw new ArgumentNullException(nameof(cache));
+        }
+        public static RulesService<TObjectToMatch> CreateDefault()
+        {
+            return new RulesService<TObjectToMatch>(new RulesCompiler(), new CachingService());
         }
         public BaseDataResponse<IEnumerable<Guid>> GetMatchingRules(TObjectToMatch objectToMatch, IEnumerable<RulesConfig> rulesConfig)
         {
