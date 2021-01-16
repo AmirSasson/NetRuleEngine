@@ -88,6 +88,7 @@ namespace NetRuleEngine.Abstraction
             ComparisonValue = comparisonValue;
             PredicateType = convertToType;
         }
+        
         public Rule() { }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace NetRuleEngine.Abstraction
@@ -18,5 +19,15 @@ namespace NetRuleEngine.Abstraction
         public Rule.InterRuleOperatorType RulesOperator { get; set; }
 
         public IEnumerable<RulesGroup> RulesGroups { get; set; }
+
+        public static RulesConfig FromJson(string json)
+        {
+            return JsonSerializer.Deserialize<RulesConfig>(json);
+        }
+
+        public string ToJson()
+        {
+            return JsonSerializer.Serialize(this);
+        }
     }
 }
