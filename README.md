@@ -113,7 +113,7 @@ Rule Config JSON Format Example:
     ]
 }
 ```
-this example represents a single rule consists on 2 groups with relation of `AND` (which means object must match both groups), on each group, at least 1 rule should match as both have `OR` operator and noth have 2 rules.
+this example represents a single rule consists on 2 groups with relation of `AND` (which means object must match both groups), on each group, at least 1 rule should match as both have `OR` operator and both have 2 criterias rules.
 
 -----------------
 
