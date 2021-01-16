@@ -1,6 +1,6 @@
  NetRuleEngine
  ==============
-C# simple Rule Engine. High performance object rule matching. Support various complex grouped predeicates.
+C# simple Rule Engine. High performance object rule matching. Support various complex grouped predicates.
 available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 
 (Input) An Object + Rule(s) => (Output) Is Match
@@ -12,6 +12,33 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 - Audience Matching
 - Dynamic Alerts detection
 
+#### Common Usage Scenario
+```
++---------------+   SET    +------------+                    +---------+
+|  Rules Admin  |  +-----> |    Rule    |  +---------------> |  Rules  |
++---------------+          |   Editor   |      SAVE AS JSON  |   DB    |
+  (design time)            |     UI     |                    |         |
+                           +------------+                    +--+------+
+                                                                ^
+                                                                |
+                                                                |
+                                                                |
+                           +-----------------+                  |
+                           |    BUSSINESS    |                  |
+ +---------------+         |      LOGIC      |                  |
+ |               |         |                 |                  |
+ |   Business    | +-----> |      with       +-------------------
+ |     EVENT     |         |  NetRuleEngine  |
+ +---------------+         |                 |
+   (real time)             +-----------------+
+
+```
+* **Rules Admin** - Actor Role - that sets the rules on design time to identify an event or desired state.
+* **Rules DB** - Database to store the rules
+* **Business Event** - an Event that occurs on the bussines flow, and changes a state on your backend, or a stand alone event that needs to be tested for rule matching. can be anything as a site Visit, transaction, UI event, Login, Registration or whatever.
+* **BUSSINESS LOGIC** - this is the backend that referene the NetRuleEngine package, consumes the Rules from DB, and for each Event, run the Rule matchin and acts according to the result
+
+###### this solution doesnt not provide any rules editor UX or DB.
 
 #### Simple usage:
 
@@ -40,8 +67,58 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
         });
 ```
 
-- depenent on LazyCache to store compiles rules.
-- compiles Expression Trees into dynamic cached code to support high performance usage.
+- depenent on [LazyCache](https://github.com/alastairtree/LazyCache) to store compiles rules.
+- compiles [Expression Trees](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/expression-trees/) into dynamic cached code to support high performance usage.
+
+
+Rule Editor UI Example (not included in this project): 
+![editor](/docs/rule-ui.png "example")
+Rule Config JSON Format Example:
+```
+{
+    "Id": "eff37f67-9279-4fff-b2ea-9ef6f92a5de7",
+    "RulesOperator": "And",
+    "RulesGroups": [
+        {
+            "RulesOperator": "Or",
+            "Rules": [
+                {
+                    "ComparisonPredicate": "TextField",
+                    "ComparisonOperator": "StringStartsWith",
+                    "ComparisonValue": "NOT MATCHING PREFIX",
+                    "PredicateType": null
+                },
+                {
+                    "ComparisonPredicate": "NumericField",
+                    "ComparisonOperator": "GreaterThan",
+                    "ComparisonValue": "4",
+                    "PredicateType": null
+                }
+            ]
+        },
+        {
+            "RulesOperator": "Or",
+            "Rules": [
+                {
+                    "ComparisonPredicate": "TextField",
+                    "ComparisonOperator": "StringStartsWith",
+                    "ComparisonValue": "SomePrefix",
+                    "PredicateType": null
+                },
+                {
+                    "ComparisonPredicate": "NumericField",
+                    "ComparisonOperator": "GreaterThan",
+                    "ComparisonValue": "55",
+                    "PredicateType": null
+                }
+            ]
+        }
+    ]
+}
+```
+this example represents a single rule consists on 2 groups with relation of `AND` (which means object must match both groups), on each group, at least 1 rule should match as both have `OR` operator and both have 2 criterias rules.
+
+-----------------
 
 Features:
 - composite objects
