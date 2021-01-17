@@ -5,6 +5,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 
 (Input) An Object + Rule(s) => (Output) Is Match
 
+[![NuGet Badge](https://buildstats.info/nuget/NetRuleEngine)](https://www.nuget.org/packages/NetRuleEngine/)
 [![Build Status](https://travis-ci.com/AmirSasson/NetRuleEngine.svg?branch=main)](https://travis-ci.com/AmirSasson/NetRuleEngine)
 
 #### Use cases
