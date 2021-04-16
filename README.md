@@ -36,7 +36,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 ```
 * **Rules Admin** - Actor Role - that sets the rules on design time to identify an event or desired state.
 * **Rules DB** - Database to store the rules
-* **Business Event** - an Event that occurs on the bussines flow, and changes a state on your backend, or a stand alone event that needs to be tested for rule matching. can be anything as a site Visit, transaction, UI event, Login, Registration or whatever.
+* **Business Event** - an Event that occurs on the bussines flow, and changes a state on your backend, or a standalone event that needs to be tested for rule matching. can be anything as a site Visit, transaction, UI event, Login, Registration or whatever.
 * **BUSSINESS LOGIC** - this is the backend that referene the NetRuleEngine package, consumes the Rules from DB, and for each Event, run the Rule matchin and acts according to the result
 
 ###### this solution doesnt not provide any rules editor UX or DB.
@@ -69,7 +69,7 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
         });
 ```
 
-- depenent on [LazyCache](https://github.com/alastairtree/LazyCache) to store compiles rules.
+- depenent on [LazyCache](https://github.com/alastairtree/LazyCache) to store compiled rules for best performance.
 - compiles [Expression Trees](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/expression-trees/) into dynamic cached code to support high performance usage.
 - **dependency injection** ready, inject Either IRulesService<> or its dependencies.
 - as the RulesService is statefull and is dependent on cache, it must be configured as **singleton** on your [IOC](https://en.wikipedia.org/wiki/Inversion_of_control) (or at least, its cache dependency must be singleton)
