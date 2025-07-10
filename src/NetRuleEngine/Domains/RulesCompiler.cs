@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using static NetRuleEngine.Abstraction.Rule;
 
 namespace NetRuleEngine.Domains
-{    
+{
     public class RulesCompiler : IRulesCompiler
     {
         private static readonly ComparisonOperatorType[] CollectionComparisonTypes = new ComparisonOperatorType[] { ComparisonOperatorType.CollectionNotContainsAnyOf, ComparisonOperatorType.CollectionContainsAll, ComparisonOperatorType.CollectionContainsAnyOf };
@@ -15,7 +15,7 @@ namespace NetRuleEngine.Domains
         ///
         /// A method used to precompile rules for a provided type
         ///
-        public Func<T, bool> CompileRule<T>(RulesConfig rulesConfig)
+        public (Func<T, bool> CompliedRule, string RuleDescription) CompileRule<T>(RulesConfig rulesConfig)
         {
             // Loop through the rules and compile them against the properties of the supplied shallow object
             Expression combinedExp = null;
@@ -37,7 +37,7 @@ namespace NetRuleEngine.Domains
                     }
                 }
 
-                // Stiching the rules into 1 statement
+                // Stitching the rules into 1 statement
                 if (rulesConfig.RulesOperator == InterRuleOperatorType.And)
                 {
                     combinedExp = combinedExp != null ? Expression.AndAlso(combinedExp, groupExpression) : groupExpression;
@@ -47,8 +47,7 @@ namespace NetRuleEngine.Domains
                     combinedExp = combinedExp != null ? Expression.OrElse(combinedExp, groupExpression) : groupExpression;
                 }
             }
-
-            return Expression.Lambda<Func<T, bool>>(combinedExp ?? Expression.Constant(true), genericType).Compile();
+            return (CompliedRule: Expression.Lambda<Func<T, bool>>(combinedExp ?? Expression.Constant(true), genericType).Compile(), RuleDescription: combinedExp.ToString());
         }
 
         private static Expression getRuleExpression<T>(ParameterExpression genericType, Rule rule)
