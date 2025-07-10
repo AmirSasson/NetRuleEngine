@@ -43,9 +43,10 @@ namespace NetRuleEngine.Domains
                         matching.Add(ruleConfig.Id);
                     }
                 }
-                catch (Exception exc)
+                catch (Exception ex)
                 {
-                    return new BaseDataResponse<IEnumerable<Guid>> { Code = ErrorCode.TechnicalProblem, ErrorDescription = exc.Message, Data = matching };
+                    _logger.LogCritical(ex, "Error when running {RuleID}: {RuleDescription}", ruleConfig.Id);
+                    return new BaseDataResponse<IEnumerable<Guid>> { Code = ErrorCode.TechnicalProblem, ErrorDescription = ex.Message, Data = matching };
                 }
             }
 
