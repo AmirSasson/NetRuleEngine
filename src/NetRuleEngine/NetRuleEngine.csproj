@@ -3,6 +3,15 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>NetRuleEngine</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>AmirSasson</Authors>
+    <Description>C# simple Rule Engine. High performance object rule matching. Support various
+      complex grouped predicates.</Description>
+    <PackageProjectUrl>https://github.com/AmirSasson/NetRuleEngine</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/AmirSasson/NetRuleEngine.git</RepositoryUrl>
+    <PackageTags>rules-engine;predicate;business-rules;expression-trees</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <LangVersion>8</LangVersion>
   </PropertyGroup>
 
@@ -14,6 +23,10 @@
 
   <ItemGroup>
     <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+    <None Include="..\..\README.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
