@@ -132,14 +132,17 @@ Features:
 
 and many more. See units test for full usage scenarios.
 
-use RulePredicatePropertyAttribute to name the property to be used as a predicate, otherwise the property name will be used as predicate name.
+
+#### decoupling properties names from the rule engine
+best practice would be to decouple the Property names from the way they would be used within the rules (the same concept that JsonPropertyAttribute follows when (de)serializing from/to json). this way, renaming the properties will not break the existing rules.  
+use RulePredicatePropertyAttribute to name the rule predicate property, otherwise the property name will be used as predicate name.
 ```csharp
 
  [RulePredicateProperty("first_name")]
  public string FirstName { get; set; }
 
 ```
-textField will be used as predicate name instead of the property name, and you will be able to rename the property name (FirstName) without breaking the rules.  
+first_name will be used as predicate name instead of the property name (FirstName), and you will be able to rename the property name (FirstName) without breaking the rules.  
 as your rule will be written as:
 ```json
 {
@@ -148,4 +151,5 @@ as your rule will be written as:
     "ComparisonValue": "John"
 }
 ``` 
-for example [see TestModelWithComparisonPredicateNameAttribute for more examples](./tests/NetRuleEngineTests/RulesTests.cs)
+for example  
+[see TestModelWithComparisonPredicateNameAttribute for more examples](./tests/NetRuleEngineTests/RulesTests.cs)
