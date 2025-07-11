@@ -593,7 +593,7 @@ namespace NetRuleEngineTests
 
 
         [Fact]
-        public void GetMatchingRulesPrimitiveCollectionNoMatch_ComparisonPredicateNameAttribute_RuleNotReturned()
+        public void GetMatchingRulesPrimitiveCollectionNoMatch_ComparisonPredicateNameAttribute_RuleReturned()
         {
             // Arrange
             var engine = new RulesService<TestModelWithRulePredicatePropertyAttribute>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
@@ -623,6 +623,50 @@ namespace NetRuleEngineTests
                         ]
                     }
                 ]);
+
+            // Assert            
+            Assert.Single(matching.Data);
+        }
+
+
+        [Fact]
+        public void GetMatchingRulesP_FIrstMatchingRule_RuleReturned()
+        {
+            // Arrange
+            var engine = new RulesService<TestModelWithRulePredicatePropertyAttribute>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+
+            // Act
+            var matching = engine.GetMatchingRules(
+                new TestModelWithRulePredicatePropertyAttribute
+                {
+                    FirstName = "John",
+                },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Rules = [
+                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringEqualsCaseInsensitive, ComparisonValue ="john",  ComparisonPredicate = "first_name"},
+                                ]
+                            }
+                        ]
+                    },
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Rules = [
+                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringContains, ComparisonValue ="jo",  ComparisonPredicate = "first_name"},
+                                ]
+                            }
+                        ]
+                    }
+                ], Mode.ReturnFirstMatchingRule);
 
             // Assert            
             Assert.Single(matching.Data);

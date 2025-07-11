@@ -3,9 +3,9 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageId>NetRuleEngine</PackageId>
-    <Version>2.1.0</Version>
+    <Version>2.2.0</Version>
     <Authors>AmirSasson</Authors>
-    <Description>C# simple Rule Engine. High performance object rule matching. Support various
+    <Description>C# Rule Engine. High performance object rule matching. Support various
       complex grouped predicates.</Description>
     <PackageProjectUrl>https://github.com/AmirSasson/NetRuleEngine</PackageProjectUrl>
     <RepositoryUrl>https://github.com/AmirSasson/NetRuleEngine.git</RepositoryUrl>

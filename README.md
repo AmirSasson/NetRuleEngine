@@ -15,25 +15,21 @@ available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
 - Dynamic Alerts detection
 
 #### Common Usage Scenario
-```
-+---------------+   SET    +------------+                    +---------+
-|  Rules Admin  |  +-----> |    Rule    |  +---------------> |  Rules  |
-+---------------+          |   Editor   |      SAVE AS JSON  |   DB    |
-  (design time)            |     UI     |                    |         |
-                           +------------+                    +--+------+
-                                                                ^
-                                                                |
-                                                                |
-                                                                |
-                           +-----------------+                  |
-                           |    BUSSINESS    |                  |
- +---------------+         |      LOGIC      |                  |
- |               |         |                 |                  |
- |   Business    | +-----> |      with       +-------------------
- |     EVENT     |         |  NetRuleEngine  |
- +---------------+         |                 |
-   (real time)             +-----------------+
-
+```mermaid
+flowchart LR
+    User((Rules Admin<br/>User))
+    Editor[Rule<br/>Editor UI]
+    DB[(Rules DB)]
+    Event[Business Event<br/><i>real time</i>]
+    Logic[Business Logic]
+    Engine[NetRuleEngine]
+    
+    User -->|configures rules| Editor
+    Editor -->|SAVE AS JSON| DB
+    Event -->|trigger| Logic
+    Logic -->|1.fetch rules| DB
+    Logic -->|2.check event<br/>against rules| Engine
+    Engine -->|matching rules| Logic
 ```
 * **Rules Admin** - Actor Role - that sets the rules on design time to identify an event or desired state.
 * **Rules DB** - Database to store the rules
@@ -152,4 +148,4 @@ as your rule will be written as:
     "ComparisonValue": "John"
 }
 ``` 
-for example [see TestModelWithComparisonPredicateNameAttribute for more examples](./tests/NetRuleEngineTests/RulesTests.cs) 
+for example [see TestModelWithComparisonPredicateNameAttribute for more examples](./tests/NetRuleEngineTests/RulesTests.cs)

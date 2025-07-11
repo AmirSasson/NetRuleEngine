@@ -24,7 +24,7 @@ namespace NetRuleEngine.Domains
         {
             return new RulesService<TObjectToMatch>(new RulesCompiler(), new CachingService(), NullLogger.Instance);
         }
-        public BaseDataResponse<IEnumerable<Guid>> GetMatchingRules(TObjectToMatch objectToMatch, IEnumerable<RulesConfig> rulesConfig)
+        public BaseDataResponse<IEnumerable<Guid>> GetMatchingRules(TObjectToMatch objectToMatch, IEnumerable<RulesConfig> rulesConfig, Mode matchingMode = Mode.ReturnAllMatchingRules)
         {
             var matching = new HashSet<Guid>();
             foreach (var ruleConfig in rulesConfig)
@@ -41,6 +41,10 @@ namespace NetRuleEngine.Domains
                     if (compiledRule(objectToMatch))
                     {
                         matching.Add(ruleConfig.Id);
+                        if (matchingMode == Mode.ReturnFirstMatchingRule)
+                        {
+                            return new BaseDataResponse<IEnumerable<Guid>> { Data = matching };
+                        }
                     }
                 }
                 catch (Exception ex)

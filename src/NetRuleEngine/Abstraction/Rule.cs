@@ -52,9 +52,16 @@ namespace NetRuleEngine.Abstraction
             In = 1000,
             NotIn = 1001,
 
+            // ignore case
             StringStartsWith = 1002,
+
+            // ignore case
             StringEndsWith = 1003,
+
+            // ignore case
             StringContains = 1004,
+
+            // ignore case
             StringNotContains = 1005,
             StringMatchesRegex = 1006,
             StringEqualsCaseInsensitive = 1007,
@@ -88,7 +95,7 @@ namespace NetRuleEngine.Abstraction
             ComparisonValue = comparisonValue;
             PredicateType = convertToType;
         }
-        
+
         public Rule() { }
     }
 }
