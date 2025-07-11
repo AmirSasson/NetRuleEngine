@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NetRuleEngine.Domains;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NetRuleEngineTests

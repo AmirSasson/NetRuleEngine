@@ -16,7 +16,7 @@ namespace NetRuleEngine.Abstraction
         public Guid Id { get; set; }
 
         [JsonIgnore]
-        public string CacheKey => ToJson().GetHashCode().ToString() ?? Id.ToString();
+        public string CacheKey => ToJson().GetHashCode().ToString();
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public Rule.InterRuleOperatorType RulesOperator { get; set; }

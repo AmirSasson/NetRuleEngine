@@ -590,5 +590,62 @@ namespace NetRuleEngineTests
             // Assert            
             Assert.Empty(matching.Data);
         }
+
+
+        [Fact]
+        public void GetMatchingRulesPrimitiveCollectionNoMatch_ComparisonPredicateNameAttribute_RuleNotReturned()
+        {
+            // Arrange
+            var engine = new RulesService<TestModelWithRulePredicatePropertyAttribute>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+
+            // Act
+            var matching = engine.GetMatchingRules(
+                new TestModelWithRulePredicatePropertyAttribute
+                {
+                    FirstName = "John",
+                    PersonDetails = new Dictionary<string, string> { { "SSN", "123456789" } },
+                    PersonAddress = new AddressModel { HomeAddress = "over the rainbow", StreetAddress = "1st" }
+                },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Rules = [
+                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringEqualsCaseInsensitive, ComparisonValue ="john",  ComparisonPredicate = "first_name"},
+                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.Equal, ComparisonValue ="123456789",  ComparisonPredicate = "userDetails[SSN]"},
+                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.Equal, ComparisonValue ="over the rainbow",  ComparisonPredicate = "userAddress.home_address"},
+                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.Equal, ComparisonValue ="1st",  ComparisonPredicate = "userAddress.StreetAddress"}
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+
+            // Assert            
+            Assert.Single(matching.Data);
+        }
+    }
+    public class TestModelWithRulePredicatePropertyAttribute : TestModel
+    {
+        [RulePredicateProperty("first_name")]
+        public string FirstName { get; set; }
+
+        [RulePredicateProperty("userDetails")]
+        public Dictionary<string, string> PersonDetails { get; set; }
+
+        [RulePredicateProperty("userAddress")]
+        public AddressModel PersonAddress { get; set; }
+    }
+
+    public class AddressModel
+    {
+        [RulePredicateProperty("home_address")]
+        public string HomeAddress { get; set; }
+
+        // no Aliasing example
+        public string StreetAddress { get; set; }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using static NetRuleEngine.Abstraction.Rule;
 
@@ -54,31 +55,40 @@ namespace NetRuleEngine.Domains
         {
             Expression binaryExpression;
 
-            // Handle Nested Property
+            // Handle Nested Property (i.e. for some object that has property with name Composite that has a property of name NumericField  => Composite.NumericField)
             if (rule.ComparisonPredicate.Contains("."))
             {
                 var tokens = rule.ComparisonPredicate.Split('.');
-                var mainProp = MemberExpression.Property(genericType, tokens[0]);
 
-                var key = MemberExpression.Property(mainProp, tokens[1]);
-                var propertyType = key.Type;
-                var nullCheck = Expression.NotEqual(mainProp, Expression.Constant(null, typeof(object)));
+                var parentRulePropertyName = tokens[0];
+                var parentPropertyName = customRulePropertyToTypePropertyName(genericType.Type, parentRulePropertyName);
+
+                var parentPropExpression = MemberExpression.Property(genericType, parentPropertyName);
+
+                var nestedPropertyRulePropertyName = tokens[1];
+                var nestedPropertyPropertyName = customRulePropertyToTypePropertyName(parentPropExpression.Type, nestedPropertyRulePropertyName);
+
+                var nestedPropertyFullMemberExpression = MemberExpression.Property(parentPropExpression, nestedPropertyPropertyName);
+                var propertyType = nestedPropertyFullMemberExpression.Type;
+                var nullCheck = Expression.NotEqual(parentPropExpression, Expression.Constant(null, typeof(object)));
 
                 // Collection
-                if (typeof(System.Collections.IEnumerable).IsAssignableFrom(key.Type) && CollectionComparisonTypes.Contains(rule.ComparisonOperator))
+                if (typeof(System.Collections.IEnumerable).IsAssignableFrom(nestedPropertyFullMemberExpression.Type) && CollectionComparisonTypes.Contains(rule.ComparisonOperator))
                 {
-                    binaryExpression = createCollectionExpression(rule, key, key.Type);
+                    binaryExpression = createCollectionExpression(rule, nestedPropertyFullMemberExpression, nestedPropertyFullMemberExpression.Type);
                 }
                 else
                 {
-                    binaryExpression = createSingleExpression(rule, key, propertyType);
+                    binaryExpression = createSingleExpression(rule, nestedPropertyFullMemberExpression, propertyType);
                 }
 
                 binaryExpression = Expression.AndAlso(nullCheck, binaryExpression);
             }
             else if (rule.ComparisonPredicate.Contains("[")) // Dictionary type
             {
-                var dicPropName = rule.ComparisonPredicate.Split('[').First();
+                var dicPropRuleName = rule.ComparisonPredicate.Split('[').First();
+                var dicPropName = customRulePropertyToTypePropertyName(genericType.Type, dicPropRuleName);
+
                 var key = MemberExpression.Property(genericType, dicPropName);
                 var propertyType = typeof(T).GetProperty(dicPropName).PropertyType;
 
@@ -107,8 +117,10 @@ namespace NetRuleEngine.Domains
             }
             else
             {
-                var key = MemberExpression.Property(genericType, rule.ComparisonPredicate);
-                var propertyType = typeof(T).GetProperty(rule.ComparisonPredicate).PropertyType;
+                var comparisonPredicate = customRulePropertyToTypePropertyName(genericType.Type, rule.ComparisonPredicate);
+
+                var key = MemberExpression.Property(genericType, comparisonPredicate);
+                var propertyType = typeof(T).GetProperty(comparisonPredicate).PropertyType;
 
                 // Collection
                 if (typeof(System.Collections.IEnumerable).IsAssignableFrom(propertyType) && CollectionComparisonTypes.Contains(rule.ComparisonOperator))
@@ -122,6 +134,19 @@ namespace NetRuleEngine.Domains
             }
 
             return binaryExpression;
+
+        }
+
+        // translating ComparisonPredicate to the property name by ComparisonPredicateNameAttribute if exists.
+        static string customRulePropertyToTypePropertyName(Type objectType, string rulePropertyName)
+        {
+            var propertyByNameAttribute = objectType.GetProperties().FirstOrDefault(p => p.GetCustomAttribute<RulePredicatePropertyAttribute>()?.Name == rulePropertyName);
+            if (propertyByNameAttribute != null)
+            {
+                return propertyByNameAttribute.Name;
+            }
+
+            return rulePropertyName;
         }
 
         private static Expression createSingleExpression(Rule rule, Expression key, Type propertyType)
