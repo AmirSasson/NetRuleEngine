@@ -1,36 +1,43 @@
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 
 namespace NetRuleEngine.Abstraction
 {
+    /// <summary>
+    /// Rule Root
+    /// </summary>
     public class RulesConfig
     {
-        public class RulesGroup
-        {
-            [JsonConverter(typeof(JsonStringEnumConverter))]
-            public Rule.InterRuleOperatorType RulesOperator { get; set; }
-            public IEnumerable<Rule> Rules { get; set; }
-        }
         public Guid Id { get; set; }
 
         [JsonIgnore]
         public string CacheKey => ToJson().GetHashCode().ToString();
 
-        [JsonConverter(typeof(JsonStringEnumConverter))]
-        public Rule.InterRuleOperatorType RulesOperator { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public InternalRuleOperatorType RulesOperator { get; set; }
 
-        public IEnumerable<RulesGroup> RulesGroups { get; set; }
+        public IEnumerable<RuleNode> RulesGroups { get; set; }
 
         public static RulesConfig FromJson(string json)
         {
-            return JsonSerializer.Deserialize<RulesConfig>(json);
+            var settings = new JsonSerializerSettings
+            {
+                Converters = { new StringEnumConverter() }
+            };
+            return JsonConvert.DeserializeObject<RulesConfig>(json, settings);
         }
 
         public string ToJson()
         {
-            return JsonSerializer.Serialize(this);
+            var settings = new JsonSerializerSettings
+            {
+                Converters = { new StringEnumConverter() },
+                NullValueHandling = NullValueHandling.Ignore,
+                DefaultValueHandling = DefaultValueHandling.Ignore
+            };
+            return JsonConvert.SerializeObject(this, settings);
         }
     }
 }
