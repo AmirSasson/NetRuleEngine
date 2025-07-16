@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using static NetRuleEngine.Abstraction.Rule;
 
 namespace NetRuleEngine.Domains
 {
@@ -22,24 +21,12 @@ namespace NetRuleEngine.Domains
             Expression combinedExp = null;
             var genericType = Expression.Parameter(typeof(T));
 
-            foreach (var rulesGroup in rulesConfig.RulesGroups)
+            foreach (var ruleNode in rulesConfig.RulesGroups)
             {
-                Expression groupExpression = null;
-                foreach (var rule in rulesGroup.Rules)
-                {
-                    Expression binaryExpression = getRuleExpression<T>(genericType, rule);
-                    if (rulesGroup.RulesOperator == InterRuleOperatorType.And)
-                    {
-                        groupExpression = groupExpression != null ? Expression.AndAlso(groupExpression, binaryExpression) : binaryExpression;
-                    }
-                    else // OR
-                    {
-                        groupExpression = groupExpression != null ? Expression.OrElse(groupExpression, binaryExpression) : binaryExpression;
-                    }
-                }
+                var groupExpression = ProcessRuleOrGroup<T>(genericType, ruleNode);
 
                 // Stitching the rules into 1 statement
-                if (rulesConfig.RulesOperator == InterRuleOperatorType.And)
+                if (rulesConfig.RulesOperator == InternalRuleOperatorType.And)
                 {
                     combinedExp = combinedExp != null ? Expression.AndAlso(combinedExp, groupExpression) : groupExpression;
                 }
@@ -48,7 +35,34 @@ namespace NetRuleEngine.Domains
                     combinedExp = combinedExp != null ? Expression.OrElse(combinedExp, groupExpression) : groupExpression;
                 }
             }
-            return (CompliedRule: Expression.Lambda<Func<T, bool>>(combinedExp ?? Expression.Constant(true), genericType).Compile(), RuleDescription: combinedExp.ToString());
+            return (CompliedRule: Expression.Lambda<Func<T, bool>>(combinedExp ?? Expression.Constant(true), genericType).Compile(), RuleDescription: combinedExp?.ToString() ?? "Empty rule");
+        }
+
+        private Expression ProcessRuleOrGroup<T>(ParameterExpression genericType, RuleNode ruleNode)
+        {
+            // If it's a group, process its rules recursively
+            if (ruleNode is RulesGroup group)
+            {
+                Expression groupExp = null;
+                foreach (var childRule in group.Rules)
+                {
+                    var childExp = ProcessRuleOrGroup<T>(genericType, childRule);
+
+                    // Combine with group operator
+                    if (group.Operator == InternalRuleOperatorType.And)
+                    {
+                        groupExp = groupExp != null ? Expression.AndAlso(groupExp, childExp) : childExp;
+                    }
+                    else // OR
+                    {
+                        groupExp = groupExp != null ? Expression.OrElse(groupExp, childExp) : childExp;
+                    }
+                }
+                return groupExp ?? Expression.Constant(true);
+            }
+
+            // If it's a simple rule, use existing logic
+            return getRuleExpression<T>(genericType, ruleNode as Rule);
         }
 
         private static Expression getRuleExpression<T>(ParameterExpression genericType, Rule rule)
@@ -134,7 +148,6 @@ namespace NetRuleEngine.Domains
             }
 
             return binaryExpression;
-
         }
 
         // translating ComparisonPredicate to the property name by ComparisonPredicateNameAttribute if exists.

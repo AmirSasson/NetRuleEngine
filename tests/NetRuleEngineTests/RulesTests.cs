@@ -1,13 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
 using NetRuleEngine.Abstraction;
 using NetRuleEngine.Domains;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
-using static NetRuleEngine.Abstraction.RulesConfig;
 
 namespace NetRuleEngineTests
 {
@@ -18,18 +16,318 @@ namespace NetRuleEngineTests
         {
             var loggerFactory = LoggerFactory.Create(builder =>
             {
-                builder.AddConsole(); // This line now works with the added namespace
+                builder.AddConsole();
             });
 
             _logger = loggerFactory.CreateLogger<RulesTests>();
         }
 
+        // First add the new nested rules tests
+        [Fact]
+        public void GetMatchingRules_NestedGroups_RuleReturned()
+        {
+            // Arrange
+            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+
+            // Act
+            var matching = engine.GetMatchingRules(
+                new TestModel { TextField = "example", NumericField = 15 },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.Or,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.Equal,
+                                        ComparisonValue = "not matching",
+                                        ComparisonPredicate = nameof(TestModel.TextField)
+                                    },
+                                    new RulesGroup {
+                                        Operator = InternalRuleOperatorType.And,
+                                        Rules = [
+                                            new Rule {
+                                                ComparisonOperator = ComparisonOperatorType.Equal,
+                                                ComparisonValue = "example",
+                                                ComparisonPredicate = nameof(TestModel.TextField)
+                                            },
+                                            new Rule {
+                                                ComparisonOperator = ComparisonOperatorType.GreaterThan,
+                                                ComparisonValue = "10",
+                                                ComparisonPredicate = nameof(TestModel.NumericField)
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+
+            // Assert            
+            Assert.Single(matching.Data);
+        }
+
+
+        //{"Id":"1b82df80-d215-4fc1-bd49-7329e7f584e1","RulesOperator":"And","RulesGroups":[{"$type":"RulesGroup","Rules":[{"$type":"Rule","Operator":"And","ComparisonPredicate":"TextField","ComparisonOperator":"Equal","ComparisonValue":"not matching","PredicateType":null},{"$type":"RulesGroup","Rules":[{"$type":"RulesGroup","Rules":[{"$type":"Rule","Operator":"And","ComparisonPredicate":"TextField","ComparisonOperator":"Equal","ComparisonValue":"example","PredicateType":null}],"Operator":"Or","ComparisonPredicate":null,"ComparisonOperator":0,"ComparisonValue":null,"PredicateType":null},{"$type":"RulesGroup","Rules":[{"$type":"Rule","Operator":"And","ComparisonPredicate":"NumericField","ComparisonOperator":"GreaterThan","ComparisonValue":"10","PredicateType":null}],"Operator":"Or","ComparisonPredicate":null,"ComparisonOperator":0,"ComparisonValue":null,"PredicateType":null}],"Operator":"And","ComparisonPredicate":null,"ComparisonOperator":0,"ComparisonValue":null,"PredicateType":null}],"Operator":"Or","ComparisonPredicate":null,"ComparisonOperator":0,"ComparisonValue":null,"PredicateType":null}]}
+
+
+        [Fact]
+        public void GetMatchingRules_NestedGroups_RuleNotReturned()
+        {
+            // Arrange
+            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+
+            // Act
+            var matching = engine.GetMatchingRules(
+                new TestModel { TextField = "example", NumericField = 5 },  // NumericField < 10 should cause the nested group to not match
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.Or,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.Equal,
+                                        ComparisonValue = "not matching",
+                                        ComparisonPredicate = nameof(TestModel.TextField)
+                                    },
+                                    new RulesGroup {
+                                        Operator = InternalRuleOperatorType.And,
+                                        Rules = [
+                                            new Rule {
+                                                ComparisonOperator = ComparisonOperatorType.Equal,
+                                                ComparisonValue = "example",
+                                                ComparisonPredicate = nameof(TestModel.TextField)
+                                            },
+                                            new Rule {
+                                                ComparisonOperator = ComparisonOperatorType.GreaterThan,
+                                                ComparisonValue = "10",
+                                                ComparisonPredicate = nameof(TestModel.NumericField)
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+
+            // Assert            
+            Assert.Empty(matching.Data);
+        }
+
+        [Fact]
+        public void GetMatchingRules_DeepNestedGroups_RuleReturned()
+        {
+            // Arrange
+            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+
+            // Act
+            var matching = engine.GetMatchingRules(
+                new TestModel { TextField = "example", NumericField = 15 },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.Or,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.Equal,
+                                        ComparisonValue = "not matching",
+                                        ComparisonPredicate = nameof(TestModel.TextField)
+                                    },
+                                    new RulesGroup {
+                                        Operator = InternalRuleOperatorType.And,
+                                        Rules = [
+                                            new RulesGroup {
+                                                Operator = InternalRuleOperatorType.Or,
+                                                Rules = [
+                                                    new Rule {
+                                                        ComparisonOperator = ComparisonOperatorType.Equal,
+                                                        ComparisonValue = "example",
+                                                        ComparisonPredicate = nameof(TestModel.TextField)
+                                                    }
+                                                ]
+                                            },
+                                            new RulesGroup {
+                                                Operator = InternalRuleOperatorType.Or,
+                                                Rules = [
+                                                    new Rule {
+                                                        ComparisonOperator = ComparisonOperatorType.GreaterThan,
+                                                        ComparisonValue = "10",
+                                                        ComparisonPredicate = nameof(TestModel.NumericField)
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+
+            // Assert            
+            Assert.Single(matching.Data);
+        }
+
+        [Fact]
+        public void GetMatchingRules_DeserializedRule_RuleReturned()
+        {
+            // Arrange
+            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+
+            var rule = new RulesConfig
+            {
+                Id = Guid.NewGuid(),
+                RulesOperator = InternalRuleOperatorType.And,
+                RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.Or,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.Equal,
+                                        ComparisonValue = "not matching",
+                                        ComparisonPredicate = nameof(TestModel.TextField)
+                                    },
+                                    new RulesGroup {
+                                        Operator = InternalRuleOperatorType.And,
+                                        Rules = [
+                                            new RulesGroup {
+                                                Operator = InternalRuleOperatorType.Or,
+                                                Rules = [
+                                                    new Rule {
+                                                        ComparisonOperator = ComparisonOperatorType.Equal,
+                                                        ComparisonValue = "example",
+                                                        ComparisonPredicate = nameof(TestModel.TextField)
+                                                    }
+                                                ]
+                                            },
+                                            new RulesGroup {
+                                                Operator = InternalRuleOperatorType.Or,
+                                                Rules = [
+                                                    new Rule {
+                                                        ComparisonOperator = ComparisonOperatorType.GreaterThan,
+                                                        ComparisonValue = "10",
+                                                        ComparisonPredicate = nameof(TestModel.NumericField)
+                                                    }
+                                                ]
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+            };
+
+            var stringifiedRule = rule.ToJson(); // Serialize to JSON to simulate deserialization
+            var deserializedRule = RulesConfig.FromJson(stringifiedRule);
+
+            // Act
+            var matching = engine.GetMatchingRules(
+                new TestModel { TextField = "example", NumericField = 15 },
+                [
+                    deserializedRule
+                ]);
+
+            // Assert            
+            Assert.Single(matching.Data);
+        }
+
+        [Fact]
+        public void GetMatchingRules_DeserializedRule_RuleMatch()
+        {
+            var serializedRule = /*lang=json,strict*/ """
+{
+  "Id": "d952df97-7d54-45db-acf4-90f723e7bdf0",
+  "RulesOperator": "And",
+  "RulesGroups": [
+    {
+        "$type": "RulesGroup",
+        "Rules": [
+            {
+                "ComparisonPredicate": "TextField",
+                "ComparisonOperator": "Equal",
+                "ComparisonValue": "not matching"
+            },
+            {
+                "$type": "RulesGroup",
+                "Rules": [
+                    {
+                        "$type": "RulesGroup",
+                        "Rules": [
+                            {                                
+                                "ComparisonPredicate": "TextField",
+                                "ComparisonOperator": "Equal",
+                                "ComparisonValue": "example"
+                            },
+                            {                                
+                                "ComparisonPredicate": "TextField",
+                                "ComparisonOperator": "StringStartsWith",
+                                "ComparisonValue": "ex"
+                            }
+                        ],
+                        "Operator": "And"
+                    },
+                    {
+                        "$type": "RulesGroup",
+                        "Rules": [
+                            {                            
+                                "ComparisonPredicate": "NumericField",
+                                "ComparisonOperator": "GreaterThan",
+                                "ComparisonValue": "10"
+                            },
+                            {                            
+                                "ComparisonPredicate": "NumericField",
+                                "ComparisonOperator": "GreaterThanOrEqual",
+                                "ComparisonValue": "15"
+                            }
+                        ],
+                        "Operator": "And"
+                    }
+                ],
+                "Operator": "And"
+            }
+      ],
+      "Operator": "Or"
+    }
+  ]
+}
+""";
+
+            // Arrange
+            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+            var deserializedRule = RulesConfig.FromJson(serializedRule);
+
+
+            // Act
+            var matching = engine.GetMatchingRules(
+                new TestModel { TextField = "example", NumericField = 15 },
+                [
+                    deserializedRule
+                ]);
+
+            // Assert            
+            Assert.Single(matching.Data);
+        }
+
+
+
+
+        // Then include all the original tests, updated to use RulesGroup.Operator instead of RulesOperator
         [Theory]
-        [InlineData(5, Rule.ComparisonOperatorType.Equal, 5, true)]
-        [InlineData(5, Rule.ComparisonOperatorType.LessThan, 4, true)]
-        [InlineData(5, Rule.ComparisonOperatorType.LessThan, 6, false)]
-        [InlineData(5, Rule.ComparisonOperatorType.GreaterThan, 6, true)]
-        public void GetMatchingRules_NumericValueMatch_ShouldMatchByOperatorAndValue(int ruleVal, Rule.ComparisonOperatorType op, int objectVal, bool shouldMatch)
+        [InlineData(5, ComparisonOperatorType.Equal, 5, true)]
+        [InlineData(5, ComparisonOperatorType.LessThan, 4, true)]
+        [InlineData(5, ComparisonOperatorType.LessThan, 6, false)]
+        [InlineData(5, ComparisonOperatorType.GreaterThan, 6, true)]
+        public void GetMatchingRules_NumericValueMatch_ShouldMatchByOperatorAndValue(int ruleVal, ComparisonOperatorType op, int objectVal, bool shouldMatch)
         {
             // Arrange
             var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), _logger);
@@ -40,11 +338,11 @@ namespace NetRuleEngineTests
                 new TestModel { NumericField = numericValueTest },
                 [
                     new RulesConfig {
-                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Operator = InternalRuleOperatorType.And,
                                 Rules = [
                                     new Rule { ComparisonOperator = op, ComparisonValue = ruleVal.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
                                 ]
@@ -78,12 +376,12 @@ namespace NetRuleEngineTests
                 [
                     new RulesConfig {
                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Operator = InternalRuleOperatorType.And,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.Equal, ComparisonValue = numericValueOtherValue.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.Equal, ComparisonValue = numericValueOtherValue.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
                                 ]
                             }
                         ]
@@ -106,12 +404,12 @@ namespace NetRuleEngineTests
                 [
                     new RulesConfig {
                          Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Operator = InternalRuleOperatorType.And,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringStartsWith, ComparisonValue = "someprefix",  ComparisonPredicate = nameof(TestModel.TextField) }
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.StringStartsWith, ComparisonValue = "someprefix",  ComparisonPredicate = nameof(TestModel.TextField) }
                                 ]
                             }
                         ]
@@ -134,13 +432,13 @@ namespace NetRuleEngineTests
                 [
                     new RulesConfig {
                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Operator = InternalRuleOperatorType.And,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringStartsWith, ComparisonValue = "someprefix",  ComparisonPredicate = nameof(TestModel.TextField) },
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.GreaterThan, ComparisonValue = 4.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.StringStartsWith, ComparisonValue = "someprefix",  ComparisonPredicate = nameof(TestModel.TextField) },
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.GreaterThan, ComparisonValue = 4.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
                                 ]
                             }
                         ]
@@ -152,139 +450,7 @@ namespace NetRuleEngineTests
         }
 
         [Fact]
-        public void GetMatchingRules_MultiRuleOrMatch_RuleReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { TextField = "SomePrefixBlahBlah", NumericField = 10 },
-                [
-                    new RulesConfig {
-                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringStartsWith, ComparisonValue = "NOT MATCHING PREFIX",  ComparisonPredicate = nameof(TestModel.TextField) },
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.GreaterThan, ComparisonValue = 4.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
-                                ]
-                            }
-                        ]
-                    }
-                ]);
-
-            // Assert            
-            Assert.Single(matching.Data);
-        }
-
-        [Fact]
-        public void GetMatchingRules_MultiGroupAnMatch_RuleReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var ruleConfig =
-                    new RulesConfig
-                    {
-                        Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringStartsWith, ComparisonValue = "NOT MATCHING PREFIX",  ComparisonPredicate = nameof(TestModel.TextField) },
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.GreaterThan, ComparisonValue = 4.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
-                                ]
-                            },
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringStartsWith, ComparisonValue = "SomePrefix",  ComparisonPredicate = nameof(TestModel.TextField) },
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.GreaterThan, ComparisonValue = 55.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
-                                ]
-                            }
-                        ]
-                    };
-            var text = ruleConfig.ToJson();
-            var deserializedRules = FromJson(text);
-
-            var matching = engine.GetMatchingRules(
-                    new TestModel { TextField = "SomePrefixBlahBlah", NumericField = 10 },
-                    [deserializedRules]);
-            // Assert            
-            Assert.Single(matching.Data);
-        }
-
-        [Fact]
-        public void GetMatchingRules_MultiGroupFirstGroupNotMatch_RuleNotReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { TextField = "SomePrefixBlahBlah", NumericField = 10 },
-                [
-                    new RulesConfig {
-                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {                // this group does not match!
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringStartsWith, ComparisonValue = "NOT MATCHING PREFIX",  ComparisonPredicate = nameof(TestModel.TextField) },
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.LessThan, ComparisonValue = 4.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
-                                ]
-                            },
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringStartsWith, ComparisonValue = "SomePrefix",  ComparisonPredicate = nameof(TestModel.TextField) },
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.GreaterThan, ComparisonValue = 55.ToString(),  ComparisonPredicate = nameof(TestModel.NumericField) }
-                                ]
-                            }
-                        ]
-                    }
-                ]);
-
-            // Assert            
-            Assert.Empty(matching.Data);
-        }
-
-        [Fact]
-        public void GetMatchingRules_CompositePropertyMatch_RuleReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { Composit = new TestModel.CompositeInnerClass { NumericField = 10 } },
-                [
-                    new RulesConfig {
-                        Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.GreaterThanOrEqual, ComparisonValue = 4.ToString(),  ComparisonPredicate = $"{nameof(TestModel.Composit)}.{nameof(TestModel.Composit.NumericField)}"}
-                            ]
-                        }
-                    ]
-                    }
-                ]);
-
-            // Assert            
-            Assert.Single(matching.Data);
-        }
-
-        [Fact]
-        public void GetMatchingRules_CaluculatedCOllectionCollectionContainsAnyOfMatch_RuleReturned()
+        public void GetMatchingRules_CaluculatedCollectionContainsAnyOfMatch_RuleReturned()
         {
             // Arrange
             var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
@@ -295,15 +461,15 @@ namespace NetRuleEngineTests
                 [
                     new RulesConfig {
                          Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
+                                Operator = InternalRuleOperatorType.Or,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.CollectionContainsAnyOf, ComparisonValue = "10|11|12",  ComparisonPredicate = $"{nameof(TestModel.CaluculatedCollection)}"}
-                            ]
-                        }
-                    ]
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.CollectionContainsAnyOf, ComparisonValue = "10|11|12",  ComparisonPredicate = $"{nameof(TestModel.CaluculatedCollection)}"}
+                                ]
+                            }
+                        ]
                     }
                 ]);
 
@@ -323,166 +489,12 @@ namespace NetRuleEngineTests
                 [
                     new RulesConfig {
                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
+                                Operator = InternalRuleOperatorType.Or,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.CollectionNotContainsAnyOf, ComparisonValue = "10|11|12",  ComparisonPredicate = $"{nameof(TestModel.CaluculatedCollection)}"}
-                            ]
-                        }
-                    ]
-                    }
-                ]);
-
-            // Assert            
-            Assert.Empty(matching.Data);
-        }
-
-
-        [Fact]
-        public void GetMatchingRules_KeyValueCollectionMatch_RuleReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { KeyValueCollection = new Dictionary<string, object> { { "DateOfBirth", DateTime.Now } } },
-                [
-                    new RulesConfig {
-                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule
-                                    {
-                                        ComparisonOperator = Rule.ComparisonOperatorType.GreaterThan,
-                                        ComparisonValue = DateTime.Now.AddSeconds(-2).ToString("o"),
-                                        ComparisonPredicate = $"{nameof(TestModel.KeyValueCollection)}[DateOfBirth]",
-                                        PredicateType = TypeCode.DateTime
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]);
-
-            // Assert            
-            Assert.Single(matching.Data);
-        }
-
-        [Fact]
-        public void GetMatchingRules_KeyValueCollectionNotMatch_RuleReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { KeyValueCollection = new Dictionary<string, object> { { "DateOfBirth", DateTime.Now } } },
-                [
-                    new RulesConfig {
-                        Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    // PredicateType is needed here to be able to determine value type which is string
-                                    new Rule
-                                    {
-                                        ComparisonOperator = Rule.ComparisonOperatorType.LessThan,
-                                        ComparisonValue = DateTime.Now.AddMinutes(-5).ToString("o"),
-                                        ComparisonPredicate = $"{nameof(TestModel.KeyValueCollection)}[DateOfBirth]" ,
-                                        PredicateType = TypeCode.DateTime
-                                    }
-                            ]
-                        }
-                    ]
-                    }
-                ]);
-
-            // Assert            
-            Assert.Empty(matching.Data);
-        }
-
-        [Fact]
-        public void GetMatchingRules_EnumValueMatch_RuleReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { SomeEnumValue = TestModel.SomeEnum.Yes },
-                [
-                    new RulesConfig {
-                        Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.Equal, ComparisonValue = TestModel.SomeEnum.Yes.ToString(),  ComparisonPredicate = $"{nameof(TestModel.SomeEnumValue)}"}
-                                ]
-                            }
-                        ]
-                    }
-                ]);
-
-            // Assert            
-            Assert.Single(matching.Data);
-        }
-
-        [Fact]
-        public void GetMatchingRules_PrimitiveInCollectionMatch_RuleReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { NumericField = 3 },
-                [
-                    new RulesConfig {
-                        Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.In, ComparisonValue ="1|2|3|4|5",  ComparisonPredicate = $"{nameof(TestModel.NumericField)}"}
-                                ]
-                            }
-                        ]
-                    }
-                ]);
-
-            // Assert            
-            Assert.Single(matching.Data);
-        }
-
-        [Fact]
-        public void GetMatchingRules_PrimitiveNotInCollectionMatch_RuleReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { NumericField = 10 },
-                [
-                    new RulesConfig {
-                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.In, ComparisonValue ="1|2|3|4|5",  ComparisonPredicate = $"{nameof(TestModel.NumericField)}"}
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.CollectionNotContainsAnyOf, ComparisonValue = "10|11|12",  ComparisonPredicate = $"{nameof(TestModel.CaluculatedCollection)}"}
                                 ]
                             }
                         ]
@@ -493,49 +505,8 @@ namespace NetRuleEngineTests
             Assert.Empty(matching.Data);
         }
 
-
         [Fact]
-        public void GetMatchingRules_MultiRulesAllMatch_AllRulesReturned()
-        {
-            // Arrange
-            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
-
-            // Act
-            var matching = engine.GetMatchingRules(
-                new TestModel { NumericField = 10, TextField = "test1" },
-                [
-                    new RulesConfig {
-                        Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.NotIn, ComparisonValue ="1|2|3|4|5",  ComparisonPredicate = $"{nameof(TestModel.NumericField)}"}
-                                ]
-                            }
-                        ]
-                    },
-                     new RulesConfig {
-                        Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
-                        RulesGroups = [
-                            new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
-                                Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringEndsWith, ComparisonValue ="1",  ComparisonPredicate = $"{nameof(TestModel.TextField)}"}
-                                ]
-                            }
-                        ]
-                    }
-                ]);
-
-            // Assert            
-            Assert.Equal(2, matching.Data.Count());
-        }
-
-        [Fact]
-        public void GetMatchingRulesPrimitiveCollectionMatch_RuleReturned()
+        public void GetMatchingRules_PrimitiveCollectionMatch_RuleReturned()
         {
             // Arrange
             var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
@@ -546,12 +517,12 @@ namespace NetRuleEngineTests
                 [
                     new RulesConfig {
                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
+                                Operator = InternalRuleOperatorType.Or,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.CollectionContainsAll, ComparisonValue ="1|2",  ComparisonPredicate = $"{nameof(TestModel.PrimitivesCollection)}"}
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.CollectionContainsAll, ComparisonValue = "1|2", ComparisonPredicate = $"{nameof(TestModel.PrimitivesCollection)}"}
                                 ]
                             }
                         ]
@@ -562,9 +533,8 @@ namespace NetRuleEngineTests
             Assert.Single(matching.Data);
         }
 
-
         [Fact]
-        public void GetMatchingRulesPrimitiveCollectionNoMatch_RuleNotReturned()
+        public void GetMatchingRules_PrimitiveCollectionNoMatch_RuleNotReturned()
         {
             // Arrange
             var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
@@ -575,12 +545,12 @@ namespace NetRuleEngineTests
                 [
                     new RulesConfig {
                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.Or,
+                                Operator = InternalRuleOperatorType.Or,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.CollectionContainsAll, ComparisonValue ="1|2|10",  ComparisonPredicate = $"{nameof(TestModel.PrimitivesCollection)}"}
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.CollectionContainsAll, ComparisonValue = "1|2|10", ComparisonPredicate = $"{nameof(TestModel.PrimitivesCollection)}"}
                                 ]
                             }
                         ]
@@ -591,9 +561,8 @@ namespace NetRuleEngineTests
             Assert.Empty(matching.Data);
         }
 
-
         [Fact]
-        public void GetMatchingRulesPrimitiveCollectionNoMatch_ComparisonPredicateNameAttribute_RuleReturned()
+        public void GetMatchingRules_ComparisonPredicateNameAttribute_RuleReturned()
         {
             // Arrange
             var engine = new RulesService<TestModelWithRulePredicatePropertyAttribute>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
@@ -609,15 +578,15 @@ namespace NetRuleEngineTests
                 [
                     new RulesConfig {
                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Operator = InternalRuleOperatorType.And,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringEqualsCaseInsensitive, ComparisonValue ="john",  ComparisonPredicate = "first_name"},
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.Equal, ComparisonValue ="123456789",  ComparisonPredicate = "userDetails[SSN]"},
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.Equal, ComparisonValue ="over the rainbow",  ComparisonPredicate = "userAddress.home_address"},
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.Equal, ComparisonValue ="1st",  ComparisonPredicate = "userAddress.StreetAddress"}
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.StringEqualsCaseInsensitive, ComparisonValue = "john", ComparisonPredicate = "first_name"},
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.Equal, ComparisonValue = "123456789", ComparisonPredicate = "userDetails[SSN]"},
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.Equal, ComparisonValue = "over the rainbow", ComparisonPredicate = "userAddress.home_address"},
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.Equal, ComparisonValue = "1st", ComparisonPredicate = "userAddress.StreetAddress"}
                                 ]
                             }
                         ]
@@ -628,9 +597,8 @@ namespace NetRuleEngineTests
             Assert.Single(matching.Data);
         }
 
-
         [Fact]
-        public void GetMatchingRulesP_FIrstMatchingRule_RuleReturned()
+        public void GetMatchingRules_FirstMatchingRule_RuleReturned()
         {
             // Arrange
             var engine = new RulesService<TestModelWithRulePredicatePropertyAttribute>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
@@ -644,24 +612,24 @@ namespace NetRuleEngineTests
                 [
                     new RulesConfig {
                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Operator = InternalRuleOperatorType.And,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringEqualsCaseInsensitive, ComparisonValue ="john",  ComparisonPredicate = "first_name"},
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.StringEqualsCaseInsensitive, ComparisonValue = "john", ComparisonPredicate = "first_name"}
                                 ]
                             }
                         ]
                     },
                     new RulesConfig {
                         Id = Guid.NewGuid(),
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        RulesOperator = InternalRuleOperatorType.And,
                         RulesGroups = [
                             new RulesGroup {
-                                RulesOperator = Rule.InterRuleOperatorType.And,
+                                Operator = InternalRuleOperatorType.And,
                                 Rules = [
-                                    new Rule { ComparisonOperator = Rule.ComparisonOperatorType.StringContains, ComparisonValue ="jo",  ComparisonPredicate = "first_name"},
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.StringContains, ComparisonValue = "jo", ComparisonPredicate = "first_name"}
                                 ]
                             }
                         ]
@@ -672,6 +640,7 @@ namespace NetRuleEngineTests
             Assert.Single(matching.Data);
         }
     }
+
     public class TestModelWithRulePredicatePropertyAttribute : TestModel
     {
         [RulePredicateProperty("first_name")]

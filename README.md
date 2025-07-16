@@ -1,4 +1,4 @@
- NetRuleEngine
+NetRuleEngine
  ==============
 C# simple Rule Engine. High performance object rule matching. Support various complex grouped predicates.
 available on [nuget](https://www.nuget.org/packages/NetRuleEngine/).
@@ -36,17 +36,58 @@ flowchart LR
 * **Business Event** - an Event that occurs on the business flow, and changes a state on your backend, or a standalone event that needs to be tested for rule matching. can be anything as a site Visit, transaction, UI event, Login, Registration or whatever.
 * **Business LOGIC** - this is the backend that reference the NetRuleEngine package, consumes the Rules from DB, and for each Event, run the Rule matching and acts according to the result
 
-## Limitations
-- this solution doesn't not provide any rules editor UX or DB.
-- the rules supports up to 2 levels of conditions.
-  - supported Scenarios:
-    -  A OR B
-    -  A AND B
-    -  (A AND B AND C AND D AND ...) OR (C AND D)
-    -  (A OR B) AND (C OR D)
-    -  (A OR B) AND (C OR D)
- -  Not Supported:
-    -  (A AND OR (C AND D)) OR (X AND Y)
+## Features and Capabilities
+
+### Nested Rules Support
+The engine supports unlimited nesting of rule groups, allowing for complex logical expressions. RulesGroups can contain both individual Rules and other RulesGroups, enabling sophisticated rule combinations like:
+- `(A AND (B OR C))`
+- `(A OR B) AND (C OR (D AND E))`
+- `((A OR B) AND C) OR (D AND (E OR F))`
+
+Example of a complex nested rule:
+```csharp
+var config = new RulesConfig {
+    RulesOperator = Rule.InterRuleOperatorType.And,
+    RulesGroups = [
+        new RulesGroup {
+            Operator = Rule.InterRuleOperatorType.Or,
+            Rules = [
+                new Rule { 
+                    ComparisonOperator = Rule.ComparisonOperatorType.Equal,
+                    ComparisonValue = "example",
+                    ComparisonPredicate = "TextField"
+                },
+                new RulesGroup {
+                    Operator = Rule.InterRuleOperatorType.And,
+                    Rules = [
+                        new RulesGroup {
+                            Operator = Rule.InterRuleOperatorType.Or,
+                            Rules = [
+                                new Rule {
+                                    ComparisonOperator = Rule.ComparisonOperatorType.GreaterThan,
+                                    ComparisonValue = "10",
+                                    ComparisonPredicate = "NumericField"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+};
+```
+
+### Other Features
+- composite objects
+- enums
+- string
+- numbers
+- datetime
+- Dictionaries
+- collections
+
+and many more. See units test for full usage scenarios.
 
 #### Simple usage:
 
@@ -61,7 +102,7 @@ flowchart LR
                 RulesOperator = Rule.InterRuleOperatorType.And,
                 RulesGroups = new RulesGroup[] {
                     new RulesGroup {
-                        RulesOperator = Rule.InterRuleOperatorType.And,
+                        Operator = Rule.InterRuleOperatorType.And,
                         // every TestModel instance with NumericField Equal to 5 will match this rule
                         Rules = new[] {
                             new Rule { 
@@ -76,6 +117,7 @@ flowchart LR
         });
 ```
 
+## Technical Details
 - depenent on [LazyCache](https://github.com/alastairtree/LazyCache) to store compiled rules for best performance.
 - compiles [Expression Trees](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/expression-trees/) into dynamic cached code to support high performance usage.
 - **dependency injection** ready, inject Either IRulesService<> or its dependencies.
@@ -87,70 +129,49 @@ Rule Editor UI Example (not included in this project):
 Rule Config JSON Format Example:  
 ```json
 {
-    "Id": "eff37f67-9279-4fff-b2ea-9ef6f92a5de7",
+    "Id": "123000000-0000-0000-0000-000000000000",
     "RulesOperator": "And",
     "RulesGroups": [
         {
-            "RulesOperator": "Or",
+            "Operator": "Or",
             "Rules": [
                 {
                     "ComparisonPredicate": "TextField",
                     "ComparisonOperator": "StringStartsWith",
-                    "ComparisonValue": "NOT MATCHING PREFIX",
-                    "PredicateType": null
+                    "ComparisonValue": "NOT MATCHING PREFIX",                    
                 },
                 {
-                    "ComparisonPredicate": "NumericField",
-                    "ComparisonOperator": "GreaterThan",
-                    "ComparisonValue": "4",
-                    "PredicateType": null
-                }
-            ]
-        },
-        {
-            "RulesOperator": "Or",
-            "Rules": [
-                {
-                    "ComparisonPredicate": "TextField",
-                    "ComparisonOperator": "StringStartsWith",
-                    "ComparisonValue": "SomePrefix",
-                    "PredicateType": null
-                },
-                {
-                    "ComparisonPredicate": "NumericField",
-                    "ComparisonOperator": "GreaterThan",
-                    "ComparisonValue": "55",
-                    "PredicateType": null
+                    "Operator": "And",
+                    "Rules": [
+                        {
+                            "ComparisonPredicate": "NumericField",
+                            "ComparisonOperator": "GreaterThan",
+                            "ComparisonValue": "10",                            
+                        },
+                        {
+                            "ComparisonPredicate": "TextField",
+                            "ComparisonOperator": "Equal",
+                            "ComparisonValue": "example",
+                        }
+                    ]
                 }
             ]
         }
     ]
 }
 ```
-this example represents a single rule consists on 2 groups with relation of `AND` (which means object must match both groups), on each group, at least 1 rule should match as both have `OR` operator and both have 2 criterias rules.
+This example demonstrates a nested rule structure where:
+- The top level uses an AND operator
+- First group has an OR operator and contains:
+  - A simple string matching rule
+  - A nested group with an AND operator containing two conditions
 
------------------
-
-Features:
-- composite objects
-- enums
-- string
-- numbers
-- datetime
-- Dictionaries
-- collections
-
-and many more. See units test for full usage scenarios.
-
-
-#### decoupling properties names from the rule engine
-best practice would be to decouple the Property names from the way they would be used within the rules (the same concept that JsonPropertyAttribute follows when (de)serializing from/to json). this way, renaming the properties will not break the existing rules.  
+#### Decoupling properties names from the rule engine
+Best practice would be to decouple the Property names from the way they would be used within the rules (the same concept that JsonPropertyAttribute follows when (de)serializing from/to json). this way, renaming the properties will not break the existing rules.  
 use RulePredicatePropertyAttribute to name the rule predicate property, otherwise the property name will be used as predicate name.
 ```csharp
-
- [RulePredicateProperty("first_name")]
- public string FirstName { get; set; }
-
+[RulePredicateProperty("first_name")]
+public string FirstName { get; set; }
 ```
 first_name will be used as predicate name instead of the property name (FirstName), and you will be able to rename the property name (FirstName) without breaking the rules.  
 as your rule will be written as:
