@@ -142,6 +142,7 @@ Rule Config JSON Format Example:
                 },
                 {
                     "Operator": "And",
+                    "$type": "RulesGroup",
                     "Rules": [
                         {
                             "ComparisonPredicate": "NumericField",
