@@ -6,6 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
+#pragma warning disable IDE0007 // Use implicit type
 namespace NetRuleEngine.Domains
 {
     public class RulesCompiler : IRulesCompiler
@@ -107,7 +108,7 @@ namespace NetRuleEngine.Domains
                 var propertyType = typeof(T).GetProperty(dicPropName).PropertyType;
 
                 var indexName = rule.ComparisonPredicate.Split('[').Last().Trim(']');
-                System.Reflection.PropertyInfo indexer = propertyType.GetProperty("Item");
+                PropertyInfo indexer = propertyType.GetProperty("Item");
                 IndexExpression indexExpr = Expression.Property(key, indexer, Expression.Constant(indexName));
                 Type valueProperty = propertyType.GenericTypeArguments.Last();
                 Expression convertedIndexer = null;
@@ -124,7 +125,7 @@ namespace NetRuleEngine.Domains
                     convertedIndexer = Expression.Convert(changeTypeCall, valueProperty);
                 }
 
-                System.Reflection.MethodInfo mi = propertyType.GetMethod("ContainsKey");
+                MethodInfo mi = propertyType.GetMethod("ContainsKey");
                 var containsKeyExpression = Expression.Call(key, mi, Expression.Constant(indexName));
                 var operand = createSingleExpression(rule, convertedIndexer ?? indexExpr, valueProperty);
                 binaryExpression = Expression.AndAlso(containsKeyExpression, operand);
@@ -211,55 +212,55 @@ namespace NetRuleEngine.Domains
             }
             else if (rule.ComparisonOperator == ComparisonOperatorType.StringEqualsCaseInsensitive)
             {
-                System.Reflection.MethodInfo mi = typeof(string).GetMethod(nameof(String.Equals), new Type[] { typeof(string), typeof(StringComparison) });
+                MethodInfo mi = typeof(string).GetMethod(nameof(String.Equals), new Type[] { typeof(string), typeof(StringComparison) });
                 var call = Expression.Call(key, mi, Expression.Constant(rule.ComparisonValue), Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
                 binaryExpression = Expression.AndAlso(notNullCheck.Value, call);
             }
             else if (rule.ComparisonOperator == ComparisonOperatorType.StringNotEqualsCaseInsensitive)
             {
-                System.Reflection.MethodInfo mi = typeof(string).GetMethod(nameof(String.Equals), new Type[] { typeof(string), typeof(StringComparison) });
+                MethodInfo mi = typeof(string).GetMethod(nameof(String.Equals), new Type[] { typeof(string), typeof(StringComparison) });
                 var call = Expression.Not(Expression.Call(key, mi, Expression.Constant(rule.ComparisonValue), Expression.Constant(StringComparison.InvariantCultureIgnoreCase)));
                 binaryExpression = Expression.AndAlso(notNullCheck.Value, call);
             }
             else if (rule.ComparisonOperator == ComparisonOperatorType.StringNullOrEmpty)
             {
-                System.Reflection.MethodInfo mi = typeof(String).GetMethod(nameof(String.IsNullOrWhiteSpace), bindingAttr: System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, types: new[] { typeof(string) }, binder: null, modifiers: null);
+                MethodInfo mi = typeof(string).GetMethod(nameof(String.IsNullOrWhiteSpace), bindingAttr: System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, types: new[] { typeof(string) }, binder: null, modifiers: null);
                 var call = Expression.Call(mi, key);
                 binaryExpression = call;
             }
             else if (rule.ComparisonOperator == ComparisonOperatorType.StringNotNullOrEmpty)
             {
-                System.Reflection.MethodInfo mi = typeof(String).GetMethod(nameof(String.IsNullOrWhiteSpace), bindingAttr: System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, types: new[] { typeof(string) }, binder: null, modifiers: null);
+                MethodInfo mi = typeof(string).GetMethod(nameof(String.IsNullOrWhiteSpace), bindingAttr: System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, types: new[] { typeof(string) }, binder: null, modifiers: null);
                 var call = Expression.Not(Expression.Call(mi, key));
                 binaryExpression = call;
             }
             else if (rule.ComparisonOperator == ComparisonOperatorType.StringStartsWith)
             {
-                System.Reflection.MethodInfo mi = typeof(string).GetMethod(nameof(String.StartsWith), new Type[] { typeof(string), typeof(StringComparison) });
+                MethodInfo mi = typeof(string).GetMethod(nameof(String.StartsWith), new Type[] { typeof(string), typeof(StringComparison) });
                 var call = Expression.Call(key, mi, Expression.Constant(rule.ComparisonValue), Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
                 binaryExpression = Expression.AndAlso(notNullCheck.Value, call);
             }
             else if (rule.ComparisonOperator == ComparisonOperatorType.StringEndsWith)
             {
-                System.Reflection.MethodInfo mi = typeof(string).GetMethod(nameof(String.EndsWith), new Type[] { typeof(string), typeof(StringComparison) });
+                MethodInfo mi = typeof(string).GetMethod(nameof(String.EndsWith), new Type[] { typeof(string), typeof(StringComparison) });
                 var call = Expression.Call(key, mi, Expression.Constant(rule.ComparisonValue), Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
                 binaryExpression = Expression.AndAlso(notNullCheck.Value, call);
             }
             else if (rule.ComparisonOperator == ComparisonOperatorType.StringContains)
             {
-                System.Reflection.MethodInfo mi = typeof(string).GetMethod(nameof(String.Contains), new Type[] { typeof(string), typeof(StringComparison) });
+                MethodInfo mi = typeof(string).GetMethod(nameof(String.Contains), new Type[] { typeof(string), typeof(StringComparison) });
                 var call = Expression.Call(key, mi, Expression.Constant(rule.ComparisonValue), Expression.Constant(StringComparison.InvariantCultureIgnoreCase));
                 binaryExpression = Expression.AndAlso(notNullCheck.Value, call);
             }
             else if (rule.ComparisonOperator == ComparisonOperatorType.StringNotContains)
             {
-                System.Reflection.MethodInfo mi = typeof(string).GetMethod(nameof(String.Contains), new Type[] { typeof(string), typeof(StringComparison) });
+                MethodInfo mi = typeof(string).GetMethod(nameof(String.Contains), new Type[] { typeof(string), typeof(StringComparison) });
                 var call = Expression.Not(Expression.Call(key, mi, Expression.Constant(rule.ComparisonValue), Expression.Constant(StringComparison.InvariantCultureIgnoreCase)));
                 binaryExpression = Expression.AndAlso(notNullCheck.Value, call);
             }
             else if (rule.ComparisonOperator == ComparisonOperatorType.StringMatchesRegex)
             {
-                System.Reflection.MethodInfo mi = typeof(Regex).GetMethod("IsMatch", bindingAttr: System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, types: new[] { typeof(string), typeof(string) }, binder: null, modifiers: null);
+                MethodInfo mi = typeof(Regex).GetMethod("IsMatch", bindingAttr: System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public, types: new[] { typeof(string), typeof(string) }, binder: null, modifiers: null);
                 var call = Expression.Call(mi, key, Expression.Constant(rule.ComparisonValue));
                 binaryExpression = Expression.AndAlso(notNullCheck.Value, call);
             }

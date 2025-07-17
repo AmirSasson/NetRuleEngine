@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NetRuleEngineTests
@@ -7,13 +8,15 @@ namespace NetRuleEngineTests
     {
         public int NumericField { get; set; }
         public string TextField { get; set; }
-        public CompositeInnerClass Composit { get; set; }
+        public CompositeInnerClass Composite { get; set; }
         public IEnumerable<CompositeInnerClass> CompositeCollection { get; set; }
         public IEnumerable<int> PrimitivesCollection { get; set; }
         public Dictionary<string, object> KeyValueCollection { get; set; }
         public SomeEnum SomeEnumValue { get; set; }
+        public DateTime DateField { get; set; }
+        public bool IsActive { get; set; }
 
-        public IEnumerable<int> CaluculatedCollection => CompositeCollection?.Select(x => x.NumericField);
+        public IEnumerable<int> CalculatedCollection => CompositeCollection?.Select(x => x.NumericField);
 
         public class CompositeInnerClass
         {

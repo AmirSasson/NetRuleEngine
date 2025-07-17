@@ -78,16 +78,148 @@ var config = new RulesConfig {
 };
 ```
 
-### Other Features
-- composite objects
-- enums
-- string
-- numbers
-- datetime
-- Dictionaries
-- collections
+### Predicate Types and Operations
 
-and many more. See units test for full usage scenarios.
+Each predicate type supports specific comparison operators and requires proper ComparisonValue formatting:
+
+#### Numbers
+- **Supported Operators**: 
+  - `Equal`, `NotEqual`
+  - `GreaterThan`, `LessThan`
+  - `GreaterThanOrEqual`, `LessThanOrEqual`
+- **ComparisonValue Format**: Numeric string (e.g., `"5"`, `"10.5"`)
+- **Example**:
+  ```json
+  {
+    "ComparisonPredicate": "NumericField",
+    "ComparisonOperator": "GreaterThan",
+    "ComparisonValue": "10"
+  }
+  ```
+
+#### Strings
+- **Supported Operators**:
+  - `Equal`, `NotEqual`
+  - `StringStartsWith`, `StringEndsWith`
+  - `StringContains`, `StringNotContains`
+  - `StringMatchesRegex`
+  - `StringEqualsCaseInsensitive`, `StringNotEqualsCaseInsensitive`
+  - `StringNullOrEmpty`, `StringNotNullOrEmpty`
+- **ComparisonValue Format**: Plain text string
+- **Example**:
+  ```json
+  {
+    "ComparisonPredicate": "TextField",
+    "ComparisonOperator": "StringStartsWith",
+    "ComparisonValue": "prefix"
+  }
+  ```
+
+#### Collections
+- **Supported Operators**:
+  - `CollectionContainsAnyOf`: Checks if the collection contains any of the specified values
+  - `CollectionNotContainsAnyOf`: Checks if the collection contains none of the specified values
+  - `CollectionContainsAll`: Checks if the collection contains all specified values
+  - `In`: Checks if a value is in the specified list
+  - `NotIn`: Checks if a value is not in the specified list
+- **ComparisonValue Format**: Pipe-separated values (e.g., `"1|2|3"`)
+- **Example**:
+  ```json
+  {
+    "ComparisonPredicate": "PrimitivesCollection",
+    "ComparisonOperator": "CollectionContainsAll",
+    "ComparisonValue": "1|2|3"
+  }
+  ```
+
+#### Composite Objects
+- **Access Format**: Use dot notation to access nested properties
+- **Example**:
+  ```json
+  {
+    "ComparisonPredicate": "userAddress.StreetAddress",
+    "ComparisonOperator": "Equal",
+    "ComparisonValue": "123 Main St"
+  }
+  ```
+
+#### Dictionaries
+- **Access Format**: Use bracket notation to access dictionary items
+- **Example**:
+  ```json
+  {
+    "ComparisonPredicate": "userDetails[SSN]",
+    "ComparisonOperator": "Equal",
+    "ComparisonValue": "123-45-6789"
+  }
+  ```
+
+#### Booleans
+- **Supported Operators**: 
+  - `IsTrue`: Checks if the value is true
+  - `IsFalse`: Checks if the value is false
+- **ComparisonValue Format**: Not required for boolean operators
+- **Example**:
+  ```json
+  {
+    "ComparisonPredicate": "IsActive",
+    "ComparisonOperator": "IsTrue",
+    "ComparisonValue": null
+  }
+  ```
+
+#### Enums
+- **Supported Operators**: `Equal`, `NotEqual`
+- **ComparisonValue Format**: Enum value name as string
+- **Example**:
+  ```json
+  {
+    "ComparisonPredicate": "SomeEnumValue",
+    "ComparisonOperator": "Equal",
+    "ComparisonValue": "Yes"
+  }
+  ```
+
+#### DateTime
+- **Supported Operators**:
+  - `Equal`, `NotEqual`
+  - `GreaterThan`, `LessThan`
+  - `GreaterThanOrEqual`, `LessThanOrEqual`
+- **ComparisonValue Format**: ISO 8601 format (`"yyyy-MM-ddTHH:mm:ss"`)
+- **Example**:
+  ```json
+  {
+    "ComparisonPredicate": "DateField",
+    "ComparisonOperator": "GreaterThan",
+    "ComparisonValue": "2024-01-01T00:00:00"
+  }
+  ```
+
+#### Calculated Properties
+- Support same operators as their return type
+- Can be used with any of the above comparison operators based on the property type
+- **Example** (with calculated collection):
+  ```json
+  {
+    "ComparisonPredicate": "CalculatedCollection",
+    "ComparisonOperator": "CollectionContainsAnyOf",
+    "ComparisonValue": "10|11|12"
+  }
+  ```
+
+Note: When using `RulePredicatePropertyAttribute`, the predicate name in the rule will be the attribute value rather than the property name:
+```csharp
+[RulePredicateProperty("first_name")]
+public string FirstName { get; set; }
+```
+Then in rules:
+```json
+{
+    "ComparisonPredicate": "first_name",
+    "ComparisonOperator": "Equal",
+    "ComparisonValue": "John"
+}
+```
 
 #### Simple usage:
 

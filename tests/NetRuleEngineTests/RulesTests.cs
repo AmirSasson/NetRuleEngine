@@ -322,6 +322,264 @@ namespace NetRuleEngineTests
 
 
         // Then include all the original tests, updated to use RulesGroup.Operator instead of RulesOperator
+        [Fact]
+        public void GetMatchingRules_BooleanComparisons_MatchCorrectly()
+        {
+            // Arrange
+            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+
+            // Act & Assert
+            // IsTrue
+            var matchingIsTrue = engine.GetMatchingRules(
+                new TestModel { IsActive = true },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.IsTrue,
+                                        ComparisonValue = null,
+                                        ComparisonPredicate = nameof(TestModel.IsActive)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingIsTrue.Data);
+
+            // IsFalse
+            var matchingIsFalse = engine.GetMatchingRules(
+                new TestModel { IsActive = false },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.IsFalse,
+                                        ComparisonValue = null,
+                                        ComparisonPredicate = nameof(TestModel.IsActive)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingIsFalse.Data);
+
+            // Non-matching IsTrue
+            var nonMatchingIsTrue = engine.GetMatchingRules(
+                new TestModel { IsActive = false },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.IsTrue,
+                                        ComparisonValue = null,
+                                        ComparisonPredicate = nameof(TestModel.IsActive)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Empty(nonMatchingIsTrue.Data);
+        }
+
+        [Fact]
+        public void GetMatchingRules_EnumComparisons_MatchCorrectly()
+        {
+            // Arrange
+            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+
+            // Act & Assert
+            // Equal
+            var matchingEqual = engine.GetMatchingRules(
+                new TestModel { SomeEnumValue = TestModel.SomeEnum.Yes },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.Equal,
+                                        ComparisonValue = "Yes",
+                                        ComparisonPredicate = nameof(TestModel.SomeEnumValue)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingEqual.Data);
+
+            // Not Equal
+            var matchingNotEqual = engine.GetMatchingRules(
+                new TestModel { SomeEnumValue = TestModel.SomeEnum.No },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.NotEqual,
+                                        ComparisonValue = "Yes",
+                                        ComparisonPredicate = nameof(TestModel.SomeEnumValue)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingNotEqual.Data);
+        }
+
+        [Fact]
+        public void GetMatchingRules_DateTimeComparisons_MatchCorrectly()
+        {
+            // Arrange
+            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+            var baseDate = new DateTime(2024, 1, 1, 12, 0, 0);
+            var laterDate = baseDate.AddHours(1);
+            var earlierDate = baseDate.AddHours(-1);
+
+            // Act & Assert
+
+            // Equal
+            var matchingEqual = engine.GetMatchingRules(
+                new TestModel { DateField = baseDate },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.Equal,
+                                        ComparisonValue = "2024-01-01T12:00:00",
+                                        ComparisonPredicate = nameof(TestModel.DateField)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingEqual.Data);
+
+            // Greater Than
+            var matchingGreaterThan = engine.GetMatchingRules(
+                new TestModel { DateField = laterDate },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.GreaterThan,
+                                        ComparisonValue = "2024-01-01T12:00:00",
+                                        ComparisonPredicate = nameof(TestModel.DateField)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingGreaterThan.Data);
+
+            // Less Than
+            var matchingLessThan = engine.GetMatchingRules(
+                new TestModel { DateField = earlierDate },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.LessThan,
+                                        ComparisonValue = "2024-01-01T12:00:00",
+                                        ComparisonPredicate = nameof(TestModel.DateField)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingLessThan.Data);
+
+            // Greater Than Or Equal - Equal case
+            var matchingGreaterThanOrEqualSame = engine.GetMatchingRules(
+                new TestModel { DateField = baseDate },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.GreaterThanOrEqual,
+                                        ComparisonValue = "2024-01-01T12:00:00",
+                                        ComparisonPredicate = nameof(TestModel.DateField)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingGreaterThanOrEqualSame.Data);
+
+            // Not Equal
+            var matchingNotEqual = engine.GetMatchingRules(
+                new TestModel { DateField = laterDate },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.NotEqual,
+                                        ComparisonValue = "2024-01-01T12:00:00",
+                                        ComparisonPredicate = nameof(TestModel.DateField)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingNotEqual.Data);
+        }
+
         [Theory]
         [InlineData(5, ComparisonOperatorType.Equal, 5, true)]
         [InlineData(5, ComparisonOperatorType.LessThan, 4, true)]
@@ -466,7 +724,7 @@ namespace NetRuleEngineTests
                             new RulesGroup {
                                 Operator = InternalRuleOperatorType.Or,
                                 Rules = [
-                                    new Rule { ComparisonOperator = ComparisonOperatorType.CollectionContainsAnyOf, ComparisonValue = "10|11|12",  ComparisonPredicate = $"{nameof(TestModel.CaluculatedCollection)}"}
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.CollectionContainsAnyOf, ComparisonValue = "10|11|12",  ComparisonPredicate = $"{nameof(TestModel.CalculatedCollection)}"}
                                 ]
                             }
                         ]
@@ -494,7 +752,7 @@ namespace NetRuleEngineTests
                             new RulesGroup {
                                 Operator = InternalRuleOperatorType.Or,
                                 Rules = [
-                                    new Rule { ComparisonOperator = ComparisonOperatorType.CollectionNotContainsAnyOf, ComparisonValue = "10|11|12",  ComparisonPredicate = $"{nameof(TestModel.CaluculatedCollection)}"}
+                                    new Rule { ComparisonOperator = ComparisonOperatorType.CollectionNotContainsAnyOf, ComparisonValue = "10|11|12",  ComparisonPredicate = $"{nameof(TestModel.CalculatedCollection)}"}
                                 ]
                             }
                         ]
