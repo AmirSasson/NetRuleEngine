@@ -120,7 +120,7 @@ Each predicate type supports specific comparison operators and requires proper C
   - `CollectionContainsAnyOf`: Checks if the collection contains any of the specified values
   - `CollectionNotContainsAnyOf`: Checks if the collection contains none of the specified values
   - `CollectionContainsAll`: Checks if the collection contains all specified values
-  - `In`: Checks if a value is in the specified list
+  - `In`: Checks if a value is in the specified list (operates on non-collection types: numeric/strings etc ..)
   - `NotIn`: Checks if a value is not in the specified list
 - **ComparisonValue Format**: Pipe-separated values (e.g., `"1|2|3"`)
 - **Example**:
