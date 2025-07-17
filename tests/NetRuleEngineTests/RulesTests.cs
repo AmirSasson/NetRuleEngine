@@ -400,6 +400,106 @@ namespace NetRuleEngineTests
         }
 
         [Fact]
+        public void GetMatchingRules_EnumInOperators_MatchCorrectly()
+        {
+            // Arrange
+            var engine = new RulesService<TestModel>(new RulesCompiler(), new LazyCache.Mocks.MockCachingService(), NullLogger.Instance);
+
+            // Act & Assert
+            // In operator matches when value is in set
+            var matchingIn = engine.GetMatchingRules(
+                new TestModel { SomeEnumValue = TestModel.SomeEnum.Yes },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.In,
+                                        ComparisonValue = "Yes|No",
+                                        ComparisonPredicate = nameof(TestModel.SomeEnumValue)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingIn.Data);
+
+            // NotIn operator matches when value is not in set
+            var matchingNotIn = engine.GetMatchingRules(
+                new TestModel { SomeEnumValue = TestModel.SomeEnum.Yes },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.NotIn,
+                                        ComparisonValue = "No",
+                                        ComparisonPredicate = nameof(TestModel.SomeEnumValue)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Single(matchingNotIn.Data);
+
+            // In operator does not match when value is not in set
+            var nonMatchingIn = engine.GetMatchingRules(
+                new TestModel { SomeEnumValue = TestModel.SomeEnum.Yes },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.In,
+                                        ComparisonValue = "No",
+                                        ComparisonPredicate = nameof(TestModel.SomeEnumValue)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Empty(nonMatchingIn.Data);
+
+            // NotIn operator does not match when value is in set
+            var nonMatchingNotIn = engine.GetMatchingRules(
+                new TestModel { SomeEnumValue = TestModel.SomeEnum.Yes },
+                [
+                    new RulesConfig {
+                        Id = Guid.NewGuid(),
+                        RulesOperator = InternalRuleOperatorType.And,
+                        RulesGroups = [
+                            new RulesGroup {
+                                Operator = InternalRuleOperatorType.And,
+                                Rules = [
+                                    new Rule {
+                                        ComparisonOperator = ComparisonOperatorType.NotIn,
+                                        ComparisonValue = "Yes|No",
+                                        ComparisonPredicate = nameof(TestModel.SomeEnumValue)
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]);
+            Assert.Empty(nonMatchingNotIn.Data);
+        }
+
+        [Fact]
         public void GetMatchingRules_EnumComparisons_MatchCorrectly()
         {
             // Arrange

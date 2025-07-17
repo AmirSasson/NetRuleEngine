@@ -169,14 +169,26 @@ Each predicate type supports specific comparison operators and requires proper C
   ```
 
 #### Enums
-- **Supported Operators**: `Equal`, `NotEqual`
-- **ComparisonValue Format**: Enum value name as string
-- **Example**:
+- **Supported Operators**: 
+  - `Equal`, `NotEqual`: Compare with a single enum value
+  - `In`: Check if value matches any in a set of values
+  - `NotIn`: Check if value doesn't match any in a set of values
+- **ComparisonValue Format**: 
+  - For Equal/NotEqual: Enum value name as string
+  - For In/NotIn: Pipe-separated enum value names
+- **Examples**:
   ```json
   {
     "ComparisonPredicate": "SomeEnumValue",
     "ComparisonOperator": "Equal",
     "ComparisonValue": "Yes"
+  }
+  ```
+  ```json
+  {
+    "ComparisonPredicate": "SomeEnumValue",
+    "ComparisonOperator": "In",
+    "ComparisonValue": "Yes|No"
   }
   ```
 
